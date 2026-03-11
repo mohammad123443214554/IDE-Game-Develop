@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IDE Game Develop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ============ CSS VARIABLES & RESET ============ */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050a10;--bg2:#0a1525;--bg3:#0d1b2a;
+  --border:rgba(0,212,255,0.2);--text:#e0f4ff;--text2:#7ab8d4;
+  --neon:#00d4ff;--green:#00ff88;--pink:#ff0080;--purple:#bf00ff;
+  --yellow:#ffdd00;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--neon);border-radius:3px;}
+a{text-decoration:none;color:inherit;}
+
+/* ============ TYPOGRAPHY ============ */
+.font-display{font-family:'Orbitron',monospace;}
+.neon{color:var(--neon);text-shadow:0 0 10px var(--neon),0 0 20px var(--neon);}
+
+/* ============ LAYOUT ============ */
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+.container{max-width:1200px;margin:0 auto;padding:0 24px;}
+
+/* ============ NAVBAR ============ */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(5,10,16,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1200px;margin:0 auto;padding:0 24px;}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.nav-logo-icon{width:34px;height:34px;background:var(--neon);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;color:#000;font-size:13px;box-shadow:0 0 15px var(--neon);}
+.nav-logo-text{font-family:'Orbitron',monospace;font-weight:700;color:var(--neon);font-size:15px;}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-link{padding:7px 12px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-radius:6px;transition:all .2s;white-space:nowrap;}
+.nav-link:hover,.nav-link.active{color:var(--neon);}
+.nav-auth{display:flex;align-items:center;gap:10px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 20px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .3s;border:none;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+.btn-outline{background:transparent;border:1px solid var(--neon);color:var(--neon);}
+.btn-outline:hover{background:var(--neon);color:#000;box-shadow:0 0 20px var(--neon);}
+.btn-primary{background:var(--neon);color:#000;}
+.btn-primary:hover{box-shadow:0 0 25px var(--neon),0 0 50px var(--neon);}
+.btn-sm{padding:6px 14px;font-size:10px;}
+.btn-danger{background:transparent;border:1px solid #ff4444;color:#ff4444;}
+.btn-danger:hover{background:#ff4444;color:#fff;}
+.nav-user{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 10px;border:1px solid var(--border);border-radius:8px;}
+.nav-avatar{width:28px;height:28px;background:var(--neon);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:13px;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+.hamburger span{width:22px;height:2px;background:var(--neon);border-radius:2px;transition:all .3s;}
+@media(max-width:900px){.nav-links{display:none;}.hamburger{display:flex;}}
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:var(--bg3);border-bottom:1px solid var(--border);z-index:999;padding:16px;}
+.mobile-menu.open{display:block;}
+.mobile-menu .nav-link{display:block;padding:12px 8px;border-bottom:1px solid var(--border);}
+
+/* ============ GLASS CARD ============ */
+.glass{background:rgba(13,27,42,0.8);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:12px;}
+.glass:hover{border-color:var(--neon);}
+
+/* ============ INPUT ============ */
+.input{width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:6px;padding:10px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;outline:none;transition:border-color .3s;}
+.input:focus{border-color:var(--neon);box-shadow:0 0 10px rgba(0,212,255,0.15);}
+.input::placeholder{color:var(--text2);opacity:.6;}
+select.input option{background:var(--bg3);}
+textarea.input{resize:vertical;}
+.label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.err{color:#ff4444;font-size:12px;margin-top:4px;}
+.form-group{margin-bottom:16px;}
+
+/* ============ GRID BG ============ */
+.grid-bg{background-image:linear-gradient(rgba(0,212,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.05) 1px,transparent 1px);background-size:40px 40px;}
+
+/* ============ HERO ============ */
+#home-page{padding-top:60px;}
+.hero{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,212,255,0.1) 0%,transparent 70%);}
+.hero-grid{position:absolute;inset:0;opacity:.2;}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:800px;padding:0 24px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:50px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--neon);font-size:13px;font-weight:600;margin-bottom:24px;}
+.badge-dot{width:8px;height:8px;border-radius:50%;background:var(--neon);animation:pulse 1s infinite;}
+.hero-title{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(36px,8vw,80px);line-height:1.1;margin-bottom:20px;}
+.hero-sub{font-size:18px;color:var(--text2);max-width:600px;margin:0 auto 32px;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.hero-particles span{position:absolute;border-radius:50%;background:var(--neon);animation:float linear infinite;}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:40px 0;}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+.stat-card{text-align:center;padding:24px 16px;}
+.stat-val{font-family:'Orbitron',monospace;font-weight:900;font-size:32px;color:var(--neon);}
+.stat-label{font-size:13px;color:var(--text2);margin-top:4px;}
+
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:20px 0 60px;}
+@media(max-width:768px){.features-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.features-grid{grid-template-columns:1fr;}}
+.feature-card{padding:24px;transition:transform .3s;}
+.feature-card:hover{transform:translateY(-4px);}
+.feat-icon{font-size:32px;margin-bottom:12px;}
+.feat-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;margin-bottom:8px;}
+.feat-desc{font-size:14px;color:var(--text2);line-height:1.6;}
+
+.section-title{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(24px,4vw,40px);text-align:center;margin-bottom:8px;}
+.section-sub{text-align:center;color:var(--text2);margin-bottom:40px;}
+
+/* ============ GAMES PAGE ============ */
+#games-page{padding-top:80px;}
+.search-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+.search-row .input{flex:1;min-width:200px;}
+.genre-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.genre-btn{padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;border:1px solid var(--border);color:var(--text2);}
+.genre-btn.active,.genre-btn:hover{background:var(--neon);color:#000;border-color:var(--neon);}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;}
+.game-card{border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .3s;background:var(--bg3);border:1px solid var(--border);}
+.game-card:hover{transform:scale(1.04);border-color:var(--neon);}
+.game-thumb{height:110px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden;}
+.game-thumb img{width:100%;height:100%;object-fit:cover;}
+.game-play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.game-card:hover .game-play-overlay{opacity:1;}
+.game-info{padding:10px;}
+.game-title{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.game-creator{font-size:11px;color:var(--text2);margin:3px 0;}
+.game-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);}
+.new-badge{position:absolute;top:6px;left:6px;background:var(--green);color:#000;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;font-family:'Orbitron',monospace;}
+
+/* ============ GAME DETAIL ============ */
+#game-detail-page{padding-top:80px;}
+.game-detail-grid{display:grid;grid-template-columns:1fr 300px;gap:24px;}
+@media(max-width:768px){.game-detail-grid{grid-template-columns:1fr;}}
+.game-canvas-wrap{position:relative;border-radius:12px;overflow:hidden;border:2px solid var(--border);}
+.game-canvas-placeholder{aspect-ratio:16/10;background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+#game-canvas{display:block;width:100%;max-width:800px;}
+
+/* ============ AUTH PAGES ============ */
+#login-page,#signup-page{padding-top:60px;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.auth-box{width:100%;max-width:440px;padding:40px;margin:20px;}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo-icon{width:52px;height:52px;background:var(--neon);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;color:#000;font-size:18px;margin:0 auto 12px;}
+.auth-title{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;text-align:center;}
+.auth-sub{font-size:14px;color:var(--text2);text-align:center;margin-top:6px;}
+.pw-rules{font-size:12px;margin-top:8px;}
+.pw-rule{display:flex;align-items:center;gap:6px;padding:2px 0;transition:color .2s;}
+.pw-rule.ok{color:var(--green);}
+.pw-rule.no{color:#555;}
+.otp-input{text-align:center;font-size:28px;font-family:'Orbitron',monospace;letter-spacing:12px;}
+
+/* ============ DASHBOARD ============ */
+#dashboard-page{padding-top:80px;}
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+@media(max-width:700px){.dash-stats{grid-template-columns:repeat(2,1fr);}}
+.dash-stat{padding:20px;}
+.dash-stat-icon{font-size:24px;margin-bottom:8px;}
+.dash-stat-val{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;}
+.dash-stat-label{font-size:12px;color:var(--text2);margin-top:4px;}
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:700px){.dash-grid{grid-template-columns:1fr;}}
+.dash-card{padding:20px;}
+.dash-card h3{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;margin-bottom:16px;color:var(--neon);}
+.dash-action{display:block;width:100%;padding:10px;margin-bottom:8px;text-align:left;font-size:13px;color:var(--text2);background:transparent;border:none;cursor:pointer;transition:color .2s;font-family:'Rajdhani',sans-serif;}
+.dash-action:hover{color:var(--neon);}
+
+/* ============ LAB ============ */
+#lab-page{padding-top:60px;height:100vh;}
+.lab-wrap{height:calc(100vh - 60px);display:flex;flex-direction:column;}
+.lab-toolbar{height:46px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:4px;padding:0 12px;overflow-x:auto;flex-shrink:0;}
+.lab-project-name{background:transparent;border:none;outline:none;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--neon);min-width:120px;max-width:200px;}
+.tb-sep{width:1px;height:24px;background:var(--border);margin:0 4px;flex-shrink:0;}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;font-size:11px;font-family:'Orbitron',monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .2s;white-space:nowrap;border-radius:4px;flex-shrink:0;}
+.tb-btn:hover{border-color:var(--neon);color:var(--neon);}
+.tb-btn.primary{background:var(--neon);color:#000;border-color:var(--neon);}
+.lab-main{flex:1;display:flex;overflow:hidden;}
+.lab-left{width:200px;flex-shrink:0;border-right:1px solid var(--border);background:var(--bg3);display:flex;flex-direction:column;overflow:hidden;}
+.lab-panel-tabs{display:flex;border-bottom:1px solid var(--border);}
+.lab-tab{flex:1;padding:8px 4px;font-size:10px;font-family:'Orbitron',monospace;text-align:center;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent;}
+.lab-tab.active{color:var(--neon);border-bottom:2px solid var(--neon);}
+.lab-panel-body{flex:1;overflow-y:auto;padding:8px;}
+.obj-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent;transition:all .2s;font-size:12px;}
+.obj-item:hover{border-color:var(--border);}
+.obj-item.selected{background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.4);}
+.obj-color{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+.obj-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.obj-del{color:#ff4444;font-size:11px;opacity:0;transition:opacity .2s;}
+.obj-item:hover .obj-del{opacity:1;}
+.lab-center{flex:1;display:flex;flex-direction:column;background:#05080f;overflow:hidden;}
+.canvas-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px;}
+#lab-canvas{background:#0a1020;cursor:crosshair;display:block;}
+.canvas-info{height:26px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:0 12px;font-size:11px;color:var(--text2);flex-shrink:0;}
+.lab-right{width:200px;flex-shrink:0;border-left:1px solid var(--border);background:var(--bg3);overflow-y:auto;}
+.props-title{padding:8px 12px;font-size:11px;font-family:'Orbitron',monospace;font-weight:700;color:var(--neon);border-bottom:1px solid var(--border);}
+.props-body{padding:10px;}
+.prop-row{margin-bottom:10px;}
+.prop-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.prop-input{width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);color:var(--text);padding:5px 8px;font-size:12px;border-radius:4px;outline:none;font-family:'Rajdhani',sans-serif;}
+.prop-input:focus{border-color:var(--neon);}
+.lab-bottom{height:180px;flex-shrink:0;border-top:1px solid var(--border);background:var(--bg3);display:flex;flex-direction:column;}
+.events-header{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.events-header span{font-size:11px;font-family:'Orbitron',monospace;font-weight:700;color:var(--neon);}
+.events-table{flex:1;overflow:auto;}
+table.ev-table{width:100%;border-collapse:collapse;font-size:11px;}
+table.ev-table th{padding:5px 10px;text-align:left;font-family:'Orbitron',monospace;font-size:10px;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg3);position:sticky;top:0;}
+table.ev-table td{padding:4px 8px;border-bottom:1px solid rgba(0,212,255,0.05);}
+table.ev-table tr:hover td{background:rgba(0,212,255,0.03);}
+table.ev-table select,table.ev-table input{background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:3px 6px;font-size:11px;border-radius:3px;outline:none;}
+table.ev-table select:focus,table.ev-table input:focus{border-color:var(--neon);}
+.ev-num{color:var(--text2);font-family:'Orbitron',monospace;font-size:10px;}
+.ev-del{color:#ff4444;cursor:pointer;padding:0 4px;}
+
+/* ============ YOUR GAMES ============ */
+#your-games-page{padding-top:80px;}
+.yg-grid{display:grid;grid-template-columns:220px 1fr;gap:20px;}
+@media(max-width:700px){.yg-grid{grid-template-columns:1fr;}}
+.folder-list{padding:12px;}
+.folder-item{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1px solid transparent;margin-bottom:6px;transition:all .2s;color:var(--text2);}
+.folder-item:hover{border-color:var(--border);}
+.folder-item.active{background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.4);color:var(--neon);}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;}
+.proj-card{padding:16px;cursor:pointer;transition:transform .3s;}
+.proj-card:hover{transform:translateY(-3px);}
+
+/* ============ PROFILE ============ */
+#profile-page{padding-top:80px;}
+.profile-header{display:flex;align-items:center;gap:24px;padding:28px;margin-bottom:24px;flex-wrap:wrap;}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--neon);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:#000;flex-shrink:0;}
+.profile-stats{display:flex;gap:24px;margin-top:12px;flex-wrap:wrap;}
+.profile-stat{text-align:center;}
+.profile-stat-val{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--neon);}
+.profile-stat-label{font-size:11px;color:var(--text2);}
+
+/* ============ SETTINGS ============ */
+#settings-page{padding-top:80px;}
+.settings-grid{display:grid;grid-template-columns:200px 1fr;gap:20px;}
+@media(max-width:600px){.settings-grid{grid-template-columns:1fr;}}
+.settings-sidebar{padding:12px;}
+.settings-tab{display:block;width:100%;padding:10px 12px;font-size:13px;font-weight:600;cursor:pointer;border-radius:6px;margin-bottom:4px;text-align:left;background:transparent;border:none;color:var(--text2);font-family:'Rajdhani',sans-serif;transition:all .2s;}
+.settings-tab:hover{color:var(--neon);}
+.settings-tab.active{background:rgba(0,212,255,0.12);color:var(--neon);}
+.settings-content{padding:24px;}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:500px){.theme-grid{grid-template-columns:repeat(2,1fr);}}
+.theme-card{padding:16px;border-radius:10px;cursor:pointer;transition:all .2s;text-align:center;border:2px solid var(--border);}
+.theme-card:hover{border-color:var(--neon);}
+.theme-card.active{border-color:var(--neon);background:rgba(0,212,255,0.1);}
+.theme-icon{font-size:26px;margin-bottom:6px;}
+.theme-name{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;}
+
+/* ============ MODAL ============ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal h2{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;margin-bottom:20px;color:var(--neon);}
+.modal-close{float:right;background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;margin-top:-4px;}
+.modal-close:hover{color:#ff4444;}
+
+/* ============ ABOUT / LEGAL PAGES ============ */
+#about-page,#privacy-page,#terms-page,#contact-page{padding-top:80px;}
+.legal-content{max-width:800px;margin:0 auto;padding:20px 0 60px;}
+.legal-content h1{font-family:'Orbitron',monospace;font-size:clamp(24px,4vw,40px);font-weight:900;color:var(--neon);margin-bottom:8px;}
+.legal-content h2{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;margin:28px 0 10px;}
+.legal-content p{color:var(--text2);line-height:1.7;margin-bottom:14px;font-size:15px;}
+
+/* ============ AD BANNER ============ */
+.ad-banner{width:100%;min-height:80px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:12px;margin:16px 0;}
+
+/* ============ PREVIEW MODAL ============ */
+#preview-canvas{background:#0a1020;display:block;border:2px solid var(--neon);box-shadow:0 0 30px rgba(0,212,255,0.3);}
+
+/* ============ TOASTS ============ */
+#toast-container{position:fixed;top:70px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;animation:slideIn .3s ease;background:var(--bg3);border:1px solid var(--border);}
+.toast.success{border-color:var(--green);color:var(--green);}
+.toast.error{border-color:#ff4444;color:#ff4444;}
+.toast.info{border-color:var(--neon);color:var(--neon);}
+
+/* ============ EMPTY STATE ============ */
+.empty{text-align:center;padding:60px 20px;}
+.empty-icon{font-size:56px;margin-bottom:12px;}
+.empty h3{font-family:'Orbitron',monospace;font-size:18px;margin-bottom:8px;}
+.empty p{color:var(--text2);font-size:14px;margin-bottom:20px;}
+
+/* ============ ANIMATIONS ============ */
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp .5s ease both;}
+
+/* ============ MISC ============ */
+.page-header{padding:20px 0 32px;}
+.page-header h1{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(22px,4vw,38px);}
+.page-header p{color:var(--text2);margin-top:6px;}
+.flex{display:flex;} .flex-1{flex:1;} .gap-2{gap:8px;} .gap-3{gap:12px;} .items-center{align-items:center;} .justify-between{justify-content:space-between;} .flex-wrap{flex-wrap:wrap;}
+.mt-1{margin-top:4px;} .mt-2{margin-top:8px;} .mt-3{margin-top:12px;} .mt-4{margin-top:16px;} .mt-6{margin-top:24px;} .mb-2{margin-bottom:8px;} .mb-3{margin-bottom:12px;} .mb-4{margin-bottom:16px;} .mb-6{margin-bottom:24px;}
+.text-center{text-align:center;} .text-sm{font-size:13px;} .text-xs{font-size:11px;} .text-neon{color:var(--neon);} .text-muted{color:var(--text2);}
+.w-full{width:100%;} .hidden{display:none!important;}
+.earn-info{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:8px;padding:14px;}
+.earn-info li{font-size:13px;color:var(--text2);margin-bottom:6px;list-style:none;padding-left:4px;}
+.earn-info li strong{color:var(--neon);}
+</style>
+</head>
+<body>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toast-container"></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      <div class="nav-logo-icon">IG</div>
+      <span class="nav-logo-text">IDE Game</span>
+    </div>
+    <div class="nav-links">
+      <span class="nav-link" onclick="showPage('home')">Home</span>
+      <span class="nav-link" onclick="showPage('games')">Games</span>
+      <span class="nav-link" onclick="requireAuth('lab')">Lab</span>
+      <span class="nav-link" onclick="requireAuth('your-games')">Your Games</span>
+      <span class="nav-link" onclick="requireAuth('profile')">Profile</span>
+      <span class="nav-link" onclick="showPage('about')">About</span>
+      <span class="nav-link" onclick="showPage('contact')">Contact</span>
+    </div>
+    <div class="nav-auth" id="nav-auth">
+      <button class="btn btn-outline btn-sm" onclick="showPage('login')">Login</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('signup')">Sign Up</button>
+    </div>
+    <div class="nav-user hidden" id="nav-user">
+      <div class="nav-avatar" id="nav-avatar">U</div>
+      <span id="nav-username" style="font-size:13px;font-weight:600;"></span>
+      <span style="font-size:10px;color:var(--text2);">▾</span>
+      <div style="position:absolute;top:52px;right:0;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px;min-width:160px;display:none;" id="user-dropdown">
+        <div class="dash-action" onclick="showPage('dashboard');closeDropdown()">📊 Dashboard</div>
+        <div class="dash-action" onclick="showPage('your-games');closeDropdown()">🎮 Your Games</div>
+        <div class="dash-action" onclick="showPage('settings');closeDropdown()">⚙️ Settings</div>
+        <hr style="border-color:var(--border);margin:6px 0;">
+        <div class="dash-action" style="color:#ff4444;" onclick="logout()">🚪 Logout</div>
+      </div>
+    </div>
+    <div class="hamburger" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <span class="nav-link" onclick="showPage('home');closeMobileMenu()">🏠 Home</span>
+  <span class="nav-link" onclick="showPage('games');closeMobileMenu()">🎮 Games</span>
+  <span class="nav-link" onclick="requireAuth('lab');closeMobileMenu()">⚗️ Lab</span>
+  <span class="nav-link" onclick="requireAuth('your-games');closeMobileMenu()">📁 Your Games</span>
+  <span class="nav-link" onclick="requireAuth('profile');closeMobileMenu()">👤 Profile</span>
+  <span class="nav-link" onclick="showPage('about');closeMobileMenu()">ℹ️ About</span>
+  <span class="nav-link" onclick="showPage('contact');closeMobileMenu()">📬 Contact</span>
+  <div style="display:flex;gap:8px;padding-top:10px;">
+    <button class="btn btn-outline btn-sm flex-1" onclick="showPage('login');closeMobileMenu()">Login</button>
+    <button class="btn btn-primary btn-sm flex-1" onclick="showPage('signup');closeMobileMenu()">Sign Up</button>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         HOME PAGE              -->
+<!-- ============================== -->
+<div id="home-page" class="page active">
+  <section class="hero grid-bg">
+    <div class="hero-bg"></div>
+    <div id="hero-particles"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="badge-dot"></span>🚀 Version 1.0 — Build, Publish, Earn</div>
+      <h1 class="hero-title">Create Games<br><span class="neon">Without Code</span></h1>
+      <p class="hero-sub">Professional no-code game development platform. Build, publish and monetize your games. <strong style="color:var(--neon)">200 plays = $1 earned.</strong></p>
+      <div class="hero-btns">
+        <button class="btn btn-primary" onclick="showPage('signup')" style="padding:14px 32px;font-size:13px;">🎮 Start Creating Free</button>
+        <button class="btn btn-outline" onclick="showPage('games')" style="padding:14px 32px;font-size:13px;">🔥 Explore Games</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="ad-banner">📢 Advertisement — Google AdSense Ready</div>
+    <div class="stats-row">
+      <div class="stat-card glass"><div class="stat-val">10K+</div><div class="stat-label">Games Created</div></div>
+      <div class="stat-card glass"><div class="stat-val">500K+</div><div class="stat-label">Total Plays</div></div>
+      <div class="stat-card glass"><div class="stat-val">$25K+</div><div class="stat-label">Paid to Creators</div></div>
+      <div class="stat-card glass"><div class="stat-val">8K+</div><div class="stat-label">Active Creators</div></div>
+    </div>
+
+    <div class="section-title">Everything You Need to <span class="neon">Succeed</span></div>
+    <div class="section-sub">Professional tools, zero coding required</div>
+    <div class="features-grid">
+      <div class="feature-card glass"><div class="feat-icon">🎮</div><div class="feat-title">No-Code Game Engine</div><div class="feat-desc">Build games visually with drag & drop. No programming required.</div></div>
+      <div class="feature-card glass"><div class="feat-icon">💰</div><div class="feat-title">Earn Real Money</div><div class="feat-desc">200 plays = $1. Withdraw via PayPal, UPI or Bank Transfer.</div></div>
+      <div class="feature-card glass"><div class="feat-icon">🚀</div><div class="feat-title">One-Click Publish</div><div class="feat-desc">Publish your game to the world instantly with one click.</div></div>
+      <div class="feature-card glass"><div class="feat-icon">🎨</div><div class="feat-title">Rich Asset Library</div><div class="feat-desc">Upload sprites, backgrounds, and characters easily.</div></div>
+      <div class="feature-card glass"><div class="feat-icon">⚡</div><div class="feat-title">Visual Scripting</div><div class="feat-desc">Add game logic with IF/THEN event blocks. No code needed.</div></div>
+      <div class="feature-card glass"><div class="feat-icon">📊</div><div class="feat-title">Analytics Dashboard</div><div class="feat-desc">Track plays, earnings, and growth in real time.</div></div>
+    </div>
+
+    <div style="text-align:center;padding:50px 0 20px;">
+      <div class="section-title">Turn Creativity Into <span class="neon">Cash</span></div>
+      <p class="section-sub">Every 200 plays earns you $1. Withdraw via PayPal, UPI, or Bank.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:500px;margin:0 auto 28px;">
+        <div class="glass" style="padding:20px;text-align:center;"><div style="font-size:28px;margin-bottom:6px;">🎮</div><div class="font-display" style="font-size:12px;color:var(--neon);">Create</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">Build in Lab</div></div>
+        <div class="glass" style="padding:20px;text-align:center;"><div style="font-size:28px;margin-bottom:6px;">📤</div><div class="font-display" style="font-size:12px;color:var(--neon);">Publish</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">Share it</div></div>
+        <div class="glass" style="padding:20px;text-align:center;"><div style="font-size:28px;margin-bottom:6px;">💵</div><div class="font-display" style="font-size:12px;color:var(--neon);">Earn</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">200 plays=$1</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="showPage('signup')" style="padding:14px 40px;">Start Earning Today →</button>
+    </div>
+
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="font-display" style="font-size:22px;">🔥 Featured <span class="neon">Games</span></h2>
+        <button class="btn btn-outline btn-sm" onclick="showPage('games')">View All →</button>
+      </div>
+      <div id="home-games-grid" class="games-grid"></div>
+    </div>
+    <div class="ad-banner">📢 Advertisement — Google AdSense Ready</div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         GAMES PAGE             -->
+<!-- ============================== -->
+<div id="games-page" class="page">
+  <div class="container">
+    <div class="page-header"><h1>🎮 <span class="neon">Games</span></h1><p class="text-muted">Discover games created by our community</p></div>
+    <div class="ad-banner">📢 Advertisement</div>
+    <div class="search-row">
+      <input class="input" id="games-search" placeholder="🔍 Search games by title..." oninput="filterGames()"/>
+      <input class="input" id="profile-search" placeholder="👤 Search creator username..." style="flex:1;min-width:150px;" onkeydown="if(event.key==='Enter')goToCreator()"/>
+      <button class="btn btn-outline btn-sm" onclick="goToCreator()">Search</button>
+      <select class="input" id="games-sort" onchange="filterGames()" style="min-width:140px;">
+        <option value="newest">🕐 Newest</option>
+        <option value="popular">🔥 Most Played</option>
+      </select>
+    </div>
+    <div class="genre-row" id="genre-row">
+      <button class="genre-btn active" onclick="setGenre(this,'All')">All</button>
+      <button class="genre-btn" onclick="setGenre(this,'Platformer')">Platformer</button>
+      <button class="genre-btn" onclick="setGenre(this,'Shooter')">Shooter</button>
+      <button class="genre-btn" onclick="setGenre(this,'Runner')">Runner</button>
+      <button class="genre-btn" onclick="setGenre(this,'Puzzle')">Puzzle</button>
+      <button class="genre-btn" onclick="setGenre(this,'Racing')">Racing</button>
+      <button class="genre-btn" onclick="setGenre(this,'Other')">Other</button>
+    </div>
+    <p id="games-count" class="text-sm text-muted mb-3"></p>
+    <div id="all-games-grid" class="games-grid"></div>
+    <div class="ad-banner mt-4">📢 Advertisement</div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--       GAME DETAIL PAGE         -->
+<!-- ============================== -->
+<div id="game-detail-page" class="page">
+  <div class="container">
+    <div class="ad-banner">📢 Advertisement</div>
+    <div class="game-detail-grid">
+      <div>
+        <div id="game-canvas-area" class="game-canvas-wrap">
+          <div class="game-canvas-placeholder" id="game-placeholder" style="aspect-ratio:16/10;">
+            <div style="font-size:64px;">🎮</div>
+            <button class="btn btn-primary" style="font-size:16px;padding:16px 40px;" id="play-btn" onclick="startGamePlay()">▶ PLAY NOW</button>
+          </div>
+          <canvas id="game-canvas" style="display:none;"></canvas>
+        </div>
+      </div>
+      <div>
+        <div class="glass" style="padding:20px;">
+          <h1 id="gd-title" class="font-display" style="font-size:20px;margin-bottom:8px;"></h1>
+          <div id="gd-creator" style="font-size:13px;color:var(--text2);margin-bottom:12px;cursor:pointer;"></div>
+          <p id="gd-desc" style="font-size:13px;color:var(--text2);margin-bottom:14px;"></p>
+          <div id="gd-stats" style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:16px;font-size:13px;"></div>
+          <div class="flex gap-2">
+            <button class="btn btn-primary flex-1 btn-sm" onclick="startGamePlay()">▶ Play</button>
+            <button class="btn btn-outline btn-sm" id="like-btn" onclick="likeGame()" style="padding:6px 14px;">♡ <span id="like-count">0</span></button>
+          </div>
+          <div id="controls-hint" class="hidden mt-3" style="background:rgba(0,212,255,0.05);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:var(--text2);">
+            🎮 <strong>Arrow Keys / WASD</strong> — Move<br>
+            🚀 <strong>Space</strong> — Jump / Shoot<br>
+            Click the game to focus it!
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ad-banner mt-4">📢 Advertisement</div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--          LOGIN PAGE            -->
+<!-- ============================== -->
+<div id="login-page" class="page grid-bg">
+  <div class="auth-box glass">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">IG</div>
+      <div class="auth-title">Welcome Back</div>
+      <div class="auth-sub">Login to your IDE Game account</div>
+    </div>
+    <div class="form-group"><label class="label">Email</label><input class="input" id="login-email" type="email" placeholder="you@example.com"/></div>
+    <div class="form-group"><label class="label">Password</label><input class="input" id="login-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn btn-primary w-full" onclick="doLogin()" style="margin-top:8px;">Login →</button>
+    <p class="text-center mt-4 text-sm text-muted">Don't have an account? <span style="color:var(--neon);cursor:pointer;" onclick="showPage('signup')">Sign Up Free</span></p>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--          SIGNUP PAGE           -->
+<!-- ============================== -->
+<div id="signup-page" class="page grid-bg">
+  <div class="auth-box glass" id="signup-step1">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">IG</div>
+      <div class="auth-title">Create Account</div>
+      <div class="auth-sub">Join IDE Game Develop for free</div>
+    </div>
+    <div class="form-group"><label class="label">Full Name</label><input class="input" id="su-name" placeholder="Mohammad Khan"/><div class="err" id="err-name"></div></div>
+    <div class="form-group"><label class="label">Username</label><input class="input" id="su-user" placeholder="mohammadkhan" oninput="checkUsername()"/><div class="err" id="err-user"></div></div>
+    <div class="form-group"><label class="label">Email</label><input class="input" id="su-email" type="email" placeholder="you@example.com"/><div class="err" id="err-email"></div></div>
+    <div class="form-group">
+      <label class="label">Password</label>
+      <input class="input" id="su-pw" type="password" placeholder="••••••••" oninput="checkPwRules()"/>
+      <div class="pw-rules mt-2" id="pw-rules">
+        <div class="pw-rule no" id="r-len">○ Minimum 8 characters</div>
+        <div class="pw-rule no" id="r-num">○ One number</div>
+        <div class="pw-rule no" id="r-upper">○ One uppercase letter</div>
+      </div>
+    </div>
+    <button class="btn btn-primary w-full mt-2" onclick="doSignup()">Create Account →</button>
+    <p class="text-center mt-4 text-sm text-muted">Already have an account? <span style="color:var(--neon);cursor:pointer;" onclick="showPage('login')">Login</span></p>
+  </div>
+  <div class="auth-box glass hidden" id="signup-step2">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" style="font-size:24px;">✉️</div>
+      <div class="auth-title">Verify Email</div>
+      <div class="auth-sub" id="otp-sub">Enter the 6-digit code</div>
+    </div>
+    <div class="form-group"><label class="label" style="text-align:center;display:block;">6-Digit OTP Code</label><input class="input otp-input" id="otp-input" type="text" maxlength="6" placeholder="000000" onkeydown="if(event.key==='Enter')verifyOTP()"/></div>
+    <button class="btn btn-primary w-full" onclick="verifyOTP()">✓ Verify & Continue</button>
+    <button class="btn btn-outline w-full mt-2 btn-sm" onclick="document.getElementById('signup-step1').classList.remove('hidden');document.getElementById('signup-step2').classList.add('hidden')">← Back</button>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         DASHBOARD PAGE         -->
+<!-- ============================== -->
+<div id="dashboard-page" class="page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Welcome back, <span class="neon" id="dash-username"></span></h1>
+      <p class="text-muted">Your creator dashboard</p>
+    </div>
+    <div class="dash-stats">
+      <div class="dash-stat glass"><div class="dash-stat-icon">💰</div><div class="dash-stat-val" id="ds-earnings">$0.00</div><div class="dash-stat-label">Total Earnings</div></div>
+      <div class="dash-stat glass"><div class="dash-stat-icon">👁</div><div class="dash-stat-val" id="ds-plays">0</div><div class="dash-stat-label">Total Plays</div></div>
+      <div class="dash-stat glass"><div class="dash-stat-icon">🎮</div><div class="dash-stat-val" id="ds-games">0</div><div class="dash-stat-label">Published Games</div></div>
+      <div class="dash-stat glass"><div class="dash-stat-icon">💳</div><div class="dash-stat-val" id="ds-balance">$0.00</div><div class="dash-stat-label">Available Balance</div></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-card glass">
+        <h3>⚡ Quick Actions</h3>
+        <button class="btn btn-primary w-full mb-2 btn-sm" onclick="showPage('lab')">🎮 Open Lab</button>
+        <button class="btn btn-outline w-full mb-2 btn-sm" onclick="showPage('your-games')">📁 Your Games</button>
+        <button class="btn btn-outline w-full btn-sm" id="withdraw-btn" onclick="openWithdrawModal()">💵 Withdraw Earnings</button>
+        <p id="withdraw-note" class="text-xs text-muted mt-2" style="display:none;"></p>
+      </div>
+      <div class="dash-card glass">
+        <h3>👤 Account</h3>
+        <button class="dash-action" onclick="showPage('settings')">✏️ Edit Profile</button>
+        <button class="dash-action" onclick="showPage('settings');switchSettingsTab('password')">🔒 Change Password</button>
+        <button class="dash-action" onclick="showPage('profile')">👤 View Profile</button>
+        <button class="dash-action" style="color:#ff4444;" onclick="logout()">🚪 Logout</button>
+      </div>
+      <div class="dash-card glass">
+        <h3>📈 Earning Info</h3>
+        <ul class="earn-info">
+          <li>• <strong>200 plays = $1</strong></li>
+          <li>• Min withdrawal: <strong>$5</strong></li>
+          <li>• Max per request: <strong>$10</strong></li>
+          <li>• PayPal / UPI / Bank</li>
+          <li>• Approved within 24h</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--           LAB PAGE             -->
+<!-- ============================== -->
+<div id="lab-page" class="page">
+  <div class="lab-wrap">
+    <!-- Toolbar -->
+    <div class="lab-toolbar">
+      <input class="lab-project-name" id="proj-name" value="My Game"/>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="saveProject()">💾 Save</button>
+      <button class="tb-btn" onclick="openPreview()">▶ Preview</button>
+      <button class="tb-btn primary" onclick="openPublishModal()">🌐 Publish</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="undoAction()">↩ Undo</button>
+      <button class="tb-btn" onclick="redoAction()">↪ Redo</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="addEvent()">+ Event</button>
+      <button class="tb-btn" onclick="openTemplates()">📁 Templates</button>
+      <div class="tb-sep"></div>
+      <select id="folder-select" class="prop-input" style="min-width:120px;font-family:'Orbitron',monospace;font-size:11px;">
+        <option value="">Select Folder</option>
+      </select>
+    </div>
+
+    <!-- Main Editor -->
+    <div class="lab-main">
+      <!-- Left Panel -->
+      <div class="lab-left">
+        <div class="lab-panel-tabs">
+          <button class="lab-tab active" onclick="switchLabTab(this,'objects')" id="tab-objects">🧩 Objects</button>
+          <button class="lab-tab" onclick="switchLabTab(this,'assets')" id="tab-assets">🖼 Assets</button>
+        </div>
+        <div class="lab-panel-body" id="lab-panel-objects">
+          <button class="btn btn-outline w-full btn-sm mb-2" onclick="addObject()">+ Add Object</button>
+          <div id="objects-list"></div>
+        </div>
+        <div class="lab-panel-body hidden" id="lab-panel-assets">
+          <label class="btn btn-outline w-full btn-sm mb-2" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            📤 Upload Asset
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadAsset(event)"/>
+          </label>
+          <p class="text-xs text-muted">Upload PNG/JPG sprites</p>
+          <div id="assets-list" class="mt-2"></div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="lab-center">
+        <div class="canvas-area">
+          <canvas id="lab-canvas" width="800" height="500"
+            onmousedown="canvasMouseDown(event)"
+            onmousemove="canvasMouseMove(event)"
+            onmouseup="canvasMouseUp(event)"
+            onmouseleave="canvasMouseUp(event)">
+          </canvas>
+        </div>
+        <div class="canvas-info">
+          <span>Canvas: 800×500</span>
+          <span>Objects: <span id="obj-count">0</span></span>
+          <span id="selected-info" style="color:var(--neon);"></span>
+        </div>
+      </div>
+
+      <!-- Right Panel (Properties) -->
+      <div class="lab-right">
+        <div class="props-title">⚙ PROPERTIES</div>
+        <div class="props-body" id="props-body">
+          <p style="font-size:11px;color:var(--text2);text-align:center;padding:20px 0;">Click an object to edit properties</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Panel (Events) -->
+    <div class="lab-bottom">
+      <div class="events-header">
+        <span>⚡ EVENT SYSTEM</span>
+        <button class="tb-btn" onclick="addEvent()">+ New Event</button>
+      </div>
+      <div class="events-table">
+        <table class="ev-table" id="events-table">
+          <thead><tr>
+            <th>#</th><th>TRIGGER</th><th>CONDITION</th><th>ACTION</th><th>TARGET OBJECT</th><th>VALUE</th><th></th>
+          </tr></thead>
+          <tbody id="events-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--        YOUR GAMES PAGE         -->
+<!-- ============================== -->
+<div id="your-games-page" class="page">
+  <div class="container">
+    <div class="page-header flex justify-between items-center flex-wrap gap-2">
+      <div><h1>📁 <span class="neon">Your Games</span></h1><p class="text-muted">Manage your project folders</p></div>
+      <button class="btn btn-primary btn-sm" onclick="showPage('lab')">+ New Game</button>
+    </div>
+    <div class="yg-grid">
+      <div class="glass" style="padding:0;overflow:hidden;">
+        <div style="padding:12px 14px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--neon);border-bottom:1px solid var(--border);">PROJECT FOLDERS</div>
+        <div id="folders-list" class="folder-list"></div>
+        <div style="padding:12px;">
+          <button class="btn btn-outline w-full btn-sm" onclick="openCreateFolderModal()">+ New Folder</button>
+        </div>
+      </div>
+      <div id="projects-area">
+        <div class="empty"><div class="empty-icon">👈</div><h3>Select a Folder</h3><p>Choose a folder to see your projects</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         PROFILE PAGE           -->
+<!-- ============================== -->
+<div id="profile-page" class="page">
+  <div class="container">
+    <div class="glass profile-header mb-6">
+      <div class="profile-avatar" id="pro-avatar">U</div>
+      <div style="flex:1;">
+        <h2 class="font-display" style="font-size:24px;" id="pro-fullname"></h2>
+        <p style="color:var(--neon);font-size:14px;" id="pro-username"></p>
+        <p style="color:var(--text2);font-size:13px;margin-top:6px;" id="pro-bio"></p>
+        <div class="profile-stats mt-3">
+          <div class="profile-stat"><div class="profile-stat-val" id="pro-games">0</div><div class="profile-stat-label">Games</div></div>
+          <div class="profile-stat"><div class="profile-stat-val" id="pro-plays">0</div><div class="profile-stat-label">Total Plays</div></div>
+        </div>
+      </div>
+    </div>
+    <h3 class="font-display mb-4" style="font-size:16px;">🎮 Published Games</h3>
+    <div id="profile-games-grid" class="games-grid"></div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         SETTINGS PAGE          -->
+<!-- ============================== -->
+<div id="settings-page" class="page">
+  <div class="container">
+    <div class="page-header"><h1>⚙️ <span class="neon">Settings</span></h1></div>
+    <div class="settings-grid">
+      <div class="glass" style="padding:0;overflow:hidden;">
+        <div style="padding:10px;">
+          <button class="settings-tab active" onclick="switchSettingsTab('profile')">👤 Profile</button>
+          <button class="settings-tab" onclick="switchSettingsTab('password')">🔒 Password</button>
+          <button class="settings-tab" onclick="switchSettingsTab('themes')">🎨 Themes</button>
+          <button class="settings-tab" onclick="switchSettingsTab('danger')">⚠️ Danger Zone</button>
+        </div>
+      </div>
+      <div class="glass" id="settings-content-area">
+        <!-- Profile Tab -->
+        <div id="st-profile" class="settings-content">
+          <h2 class="font-display mb-4" style="font-size:18px;">Edit Profile</h2>
+          <div class="form-group"><label class="label">Username (cannot change)</label><input class="input" id="st-username" disabled style="opacity:.5;"/></div>
+          <div class="form-group"><label class="label">Full Name</label><input class="input" id="st-fullname" placeholder="Your full name"/></div>
+          <div class="form-group"><label class="label">Bio</label><textarea class="input" id="st-bio" rows="3" placeholder="Tell us about yourself..."></textarea></div>
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save Changes</button>
+        </div>
+        <!-- Password Tab -->
+        <div id="st-password" class="settings-content hidden">
+          <h2 class="font-display mb-4" style="font-size:18px;">Change Password</h2>
+          <div class="form-group"><label class="label">Current Password</label><input class="input" id="pw-current" type="password"/></div>
+          <div class="form-group"><label class="label">New Password</label><input class="input" id="pw-new" type="password"/></div>
+          <div class="form-group"><label class="label">Confirm New Password</label><input class="input" id="pw-confirm" type="password"/></div>
+          <button class="btn btn-primary btn-sm" onclick="changePassword()">Change Password</button>
+        </div>
+        <!-- Themes Tab -->
+        <div id="st-themes" class="settings-content hidden">
+          <h2 class="font-display mb-4" style="font-size:18px;">Choose Theme</h2>
+          <div class="theme-grid">
+            <div class="theme-card active" id="theme-dark-pro" onclick="applyTheme('dark-pro')"><div class="theme-icon">⬛</div><div class="theme-name">Dark Pro</div></div>
+            <div class="theme-card" id="theme-midnight-blue" onclick="applyTheme('midnight-blue')"><div class="theme-icon">🌙</div><div class="theme-name">Midnight Blue</div></div>
+            <div class="theme-card" id="theme-cyber-purple" onclick="applyTheme('cyber-purple')"><div class="theme-icon">🟣</div><div class="theme-name">Cyber Purple</div></div>
+            <div class="theme-card" id="theme-neon-tech" onclick="applyTheme('neon-tech')"><div class="theme-icon">💚</div><div class="theme-name">Neon Tech</div></div>
+            <div class="theme-card" id="theme-light-minimal" onclick="applyTheme('light-minimal')"><div class="theme-icon">☀️</div><div class="theme-name">Light Minimal</div></div>
+            <div class="theme-card" id="theme-matrix-green" onclick="applyTheme('matrix-green')"><div class="theme-icon">💻</div><div class="theme-name">Matrix Green</div></div>
+          </div>
+        </div>
+        <!-- Danger Zone Tab -->
+        <div id="st-danger" class="settings-content hidden">
+          <h2 class="font-display mb-4" style="font-size:18px;color:#ff4444;">⚠️ Danger Zone</h2>
+          <div style="border:1px solid rgba(255,0,0,0.3);border-radius:8px;padding:16px;background:rgba(255,0,0,0.04);">
+            <h3 style="color:#ff4444;margin-bottom:8px;">Delete Account</h3>
+            <p class="text-sm text-muted mb-4">This permanently deletes your account, all projects, and earnings.</p>
+            <div class="form-group"><label class="label">Type your username to confirm</label><input class="input" id="delete-confirm" placeholder="Type your username"/></div>
+            <button class="btn btn-danger btn-sm" onclick="deleteAccount()">Delete My Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--          ABOUT PAGE            -->
+<!-- ============================== -->
+<div id="about-page" class="page">
+  <div class="container">
+    <div class="legal-content">
+      <h1>About IDE Game Develop</h1>
+      <p style="color:var(--text2);font-size:15px;margin-bottom:28px;">The future of no-code game development</p>
+      <div class="glass" style="padding:24px;margin-bottom:20px;">
+        <h2>What is IDE Game Develop?</h2>
+        <p>IDE Game Develop is a professional no-code game creation platform that allows anyone — regardless of programming experience — to create, publish, and monetize browser-based games. Our visual scripting system, intuitive canvas editor, and event-driven game engine put the power of game development in the hands of everyone.</p>
+      </div>
+      <div class="glass" style="padding:24px;margin-bottom:20px;">
+        <h2>How Does Earning Work?</h2>
+        <p>Every 200 plays earns you $1. Minimum withdrawal is $5, maximum per request is $10. Withdraw via PayPal, UPI, or Bank Transfer. Admin approves within 24 hours.</p>
+      </div>
+      <div class="glass" style="padding:24px;margin-bottom:20px;">
+        <h2>Platform Info</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div><div class="text-xs text-muted">Created by</div><div style="color:var(--neon);font-weight:700;">Mohammad Khan</div></div>
+          <div><div class="text-xs text-muted">Year</div><div style="color:var(--neon);font-weight:700;">2026</div></div>
+          <div><div class="text-xs text-muted">Version</div><div style="color:var(--neon);font-weight:700;">1.0</div></div>
+          <div><div class="text-xs text-muted">Engine</div><div style="color:var(--neon);font-weight:700;">HTML5 Canvas</div></div>
+          <div><div class="text-xs text-muted">Platform</div><div style="color:var(--neon);font-weight:700;">Web Browser</div></div>
+          <div><div class="text-xs text-muted">License</div><div style="color:var(--neon);font-weight:700;">Commercial</div></div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn btn-primary" onclick="showPage('signup')" style="padding:14px 40px;">🚀 Start Creating Today</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         CONTACT PAGE           -->
+<!-- ============================== -->
+<div id="contact-page" class="page">
+  <div class="container">
+    <div class="legal-content" style="max-width:600px;">
+      <h1>📬 Contact Us</h1>
+      <p>We'd love to hear from you.</p>
+      <div class="glass" style="padding:28px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-group"><label class="label">Name</label><input class="input" id="c-name" placeholder="Your name"/></div>
+          <div class="form-group"><label class="label">Email</label><input class="input" id="c-email" type="email" placeholder="you@example.com"/></div>
+        </div>
+        <div class="form-group"><label class="label">Subject</label><input class="input" id="c-subject" placeholder="Subject"/></div>
+        <div class="form-group"><label class="label">Message</label><textarea class="input" id="c-msg" rows="5" placeholder="Your message..."></textarea></div>
+        <button class="btn btn-primary w-full" onclick="sendContact()">📤 Send Message</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         PRIVACY PAGE           -->
+<!-- ============================== -->
+<div id="privacy-page" class="page">
+  <div class="container">
+    <div class="legal-content">
+      <h1>Privacy Policy</h1>
+      <p style="color:var(--text2);">Last updated: January 2026</p>
+      <h2>Information We Collect</h2><p>We collect your name, username, email, and usage data including game plays and earnings activity. We never sell your personal data.</p>
+      <h2>How We Use Your Information</h2><p>To provide services, process payments, send OTP emails, and communicate account updates.</p>
+      <h2>Cookies & Analytics</h2><p>We use cookies to maintain sessions and remember preferences. Google Analytics may be used to understand platform usage.</p>
+      <h2>Advertising</h2><p>Our platform displays Google AdSense advertisements. Google may use cookies to show relevant ads.</p>
+      <h2>Data Security</h2><p>We use industry-standard encryption. Passwords are hashed. No internet transmission is 100% secure.</p>
+      <h2>Contact</h2><p>For privacy concerns contact us via the Contact page.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--         TERMS PAGE             -->
+<!-- ============================== -->
+<div id="terms-page" class="page">
+  <div class="container">
+    <div class="legal-content">
+      <h1>Terms &amp; Conditions</h1>
+      <p style="color:var(--text2);">Last updated: January 2026</p>
+      <h2>Acceptance</h2><p>By using IDE Game Develop, you agree to these Terms.</p>
+      <h2>Eligibility</h2><p>You must be at least 13 years old. Users under 18 require parental consent.</p>
+      <h2>User Content</h2><p>You retain ownership of games you create. By publishing you grant us a license to display your game. Do not upload copyrighted material without permission.</p>
+      <h2>Earning & Withdrawals</h2><p>Earnings calculated at 200 plays per $1. Minimum withdrawal $5, maximum $10 per request. Fraudulent plays will be voided.</p>
+      <h2>Prohibited Conduct</h2><p>No bots to inflate plays, no malicious content, no impersonation, no law violations.</p>
+      <h2>Termination</h2><p>We may terminate accounts that violate these terms.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!--           MODALS               -->
+<!-- ============================== -->
+
+<!-- Templates Modal -->
+<div class="modal-overlay" id="templates-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('templates-modal')">✕</button>
+    <h2>🎮 Choose Template</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="glass" style="padding:16px;cursor:pointer;text-align:center;" onclick="loadTemplate('platformer');closeModal('templates-modal')"><div style="font-size:32px;margin-bottom:6px;">🦊</div><div class="font-display" style="font-size:12px;">Platformer</div></div>
+      <div class="glass" style="padding:16px;cursor:pointer;text-align:center;" onclick="loadTemplate('shooter');closeModal('templates-modal')"><div style="font-size:32px;margin-bottom:6px;">🚀</div><div class="font-display" style="font-size:12px;">Shooter</div></div>
+      <div class="glass" style="padding:16px;cursor:pointer;text-align:center;" onclick="loadTemplate('runner');closeModal('templates-modal')"><div style="font-size:32px;margin-bottom:6px;">🏃</div><div class="font-display" style="font-size:12px;">Endless Runner</div></div>
+      <div class="glass" style="padding:16px;cursor:pointer;text-align:center;" onclick="loadTemplate('empty');closeModal('templates-modal')"><div style="font-size:32px;margin-bottom:6px;">⬜</div><div class="font-display" style="font-size:12px;">Empty Project</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal" style="max-width:840px;background:var(--bg3);">
+    <div class="flex justify-between items-center mb-3">
+      <span class="font-display" style="font-size:14px;color:var(--neon);">▶ GAME PREVIEW</span>
+      <button class="btn btn-danger btn-sm" onclick="closePreview()">✕ Close</button>
+    </div>
+    <canvas id="preview-canvas" width="800" height="500" style="width:100%;display:block;"></canvas>
+    <p style="font-size:11px;color:var(--text2);margin-top:8px;">Arrow Keys / WASD = Move | Space = Jump/Shoot | Click canvas to focus</p>
+  </div>
+</div>
+
+<!-- Publish Modal -->
+<div class="modal-overlay" id="publish-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('publish-modal')">✕</button>
+    <h2>🌐 Publish Game</h2>
+    <div class="form-group"><label class="label">Game Title</label><input class="input" id="pub-title" placeholder="My Awesome Game"/></div>
+    <div class="form-group"><label class="label">Description</label><textarea class="input" id="pub-desc" rows="2" placeholder="Tell players about your game..."></textarea></div>
+    <div class="form-group"><label class="label">Genre</label>
+      <select class="input" id="pub-genre">
+        <option>Platformer</option><option>Shooter</option><option>Runner</option><option>Puzzle</option><option>Racing</option><option>Other</option>
+      </select>
+    </div>
+    <div class="flex gap-2 mt-2">
+      <button class="btn btn-primary flex-1" onclick="publishGame()">🌐 Publish Now</button>
+      <button class="btn btn-outline flex-1" onclick="closeModal('publish-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div class="modal-overlay" id="withdraw-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('withdraw-modal')">✕</button>
+    <h2>💵 Withdraw Earnings</h2>
+    <div class="form-group"><label class="label">Method</label>
+      <select class="input" id="wd-method"><option value="paypal">PayPal</option><option value="upi">UPI</option><option value="bank">Bank Transfer</option></select>
+    </div>
+    <div class="form-group"><label class="label" id="wd-detail-label">PayPal Email</label><input class="input" id="wd-details" placeholder="Enter details..."/></div>
+    <div class="form-group"><label class="label">Amount ($5 - $10)</label><input class="input" id="wd-amount" type="number" min="5" max="10" value="5"/></div>
+    <div class="flex gap-2">
+      <button class="btn btn-primary flex-1" onclick="submitWithdraw()">Submit Request</button>
+      <button class="btn btn-outline flex-1" onclick="closeModal('withdraw-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Folder Modal -->
+<div class="modal-overlay" id="folder-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('folder-modal')">✕</button>
+    <h2>📁 Create Project Folder</h2>
+    <div class="form-group"><label class="label">Folder Name</label><input class="input" id="new-folder-name" placeholder="My Games" onkeydown="if(event.key==='Enter')createFolder()"/></div>
+    <button class="btn btn-primary w-full" onclick="createFolder()">📁 Create Folder</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<div id="main-footer" style="background:var(--bg2);border-top:1px solid var(--border);padding:40px 0;margin-top:40px;">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:24px;">
+      <div>
+        <div class="flex items-center gap-2 mb-2"><div class="nav-logo-icon" style="width:28px;height:28px;font-size:11px;">IG</div><span class="font-display" style="font-size:13px;color:var(--neon);">IDE Game Develop</span></div>
+        <p style="font-size:12px;color:var(--text2);">Create games without code. Publish and earn.</p>
+      </div>
+      <div>
+        <div class="font-display mb-2" style="font-size:11px;color:var(--text);">Platform</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span class="nav-link text-xs" onclick="showPage('home')">Home</span>
+          <span class="nav-link text-xs" onclick="showPage('games')">Games</span>
+          <span class="nav-link text-xs" onclick="showPage('lab')">Lab</span>
+          <span class="nav-link text-xs" onclick="showPage('about')">About</span>
+        </div>
+      </div>
+      <div>
+        <div class="font-display mb-2" style="font-size:11px;color:var(--text);">Account</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span class="nav-link text-xs" onclick="showPage('login')">Login</span>
+          <span class="nav-link text-xs" onclick="showPage('signup')">Sign Up</span>
+          <span class="nav-link text-xs" onclick="showPage('dashboard')">Dashboard</span>
+          <span class="nav-link text-xs" onclick="showPage('settings')">Settings</span>
+        </div>
+      </div>
+      <div>
+        <div class="font-display mb-2" style="font-size:11px;color:var(--text);">Legal</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span class="nav-link text-xs" onclick="showPage('privacy')">Privacy Policy</span>
+          <span class="nav-link text-xs" onclick="showPage('terms')">Terms & Conditions</span>
+          <span class="nav-link text-xs" onclick="showPage('contact')">Contact</span>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--text2);">
+      <span>© 2026 IDE Game Develop. Created by <strong style="color:var(--neon);">Mohammad Khan</strong>. Version 1.0</span>
+      <div class="flex gap-3">
+        <span style="background:rgba(0,212,255,0.1);color:var(--neon);padding:3px 10px;border-radius:4px;font-size:11px;border:1px solid var(--border);">200 plays = $1</span>
+        <span style="background:rgba(0,212,255,0.1);color:var(--neon);padding:3px 10px;border-radius:4px;font-size:11px;border:1px solid var(--border);">Min $5 withdraw</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!--                    JAVASCRIPT                             -->
+<!-- ========================================================= -->
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = JSON.parse(localStorage.getItem('igd_user') || 'null');
+let allGames = JSON.parse(localStorage.getItem('igd_games') || '[]');
+let allUsers = JSON.parse(localStorage.getItem('igd_users') || '[]');
+let allFolders = JSON.parse(localStorage.getItem('igd_folders') || '[]');
+let allProjects = JSON.parse(localStorage.getItem('igd_projects') || '[]');
+let currentPage = 'home';
+let selectedGenre = 'All';
+
+// Lab state
+let labObjects = [];
+let labEvents = [];
+let selectedObjId = null;
+let history = [];
+let historyIdx = -1;
+let dragState = {active:false,id:null,startX:0,startY:0,objX:0,objY:0};
+let previewRAF = null;
+let currentProjectId = null;
+
+// Game detail state
+let currentGame = null;
+let gameRAF = null;
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
+function saveData(){
+  localStorage.setItem('igd_games', JSON.stringify(allGames));
+  localStorage.setItem('igd_users', JSON.stringify(allUsers));
+  localStorage.setItem('igd_folders', JSON.stringify(allFolders));
+  localStorage.setItem('igd_projects', JSON.stringify(allProjects));
+  if(currentUser) localStorage.setItem('igd_user', JSON.stringify(currentUser));
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, type='info'){
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+// ============================================================
+// PAGE ROUTING
+// ============================================================
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(name+'-page').classList.add('active');
+  currentPage = name;
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>{ if(l.textContent.toLowerCase().includes(name)) l.classList.add('active'); });
+  window.scrollTo(0,0);
+
+  // Stop game runners when leaving
+  if(name !== 'game-detail') stopGamePlay();
+  if(name !== 'lab') stopPreview();
+
+  // Page-specific init
+  if(name==='home') renderHomeGames();
+  if(name==='games') renderGamesPage();
+  if(name==='dashboard') renderDashboard();
+  if(name==='your-games') renderYourGames();
+  if(name==='profile') renderProfile();
+  if(name==='settings') renderSettings();
+  if(name==='lab') initLab();
+
+  // Footer visibility
+  const noFooter = ['lab'];
+  document.getElementById('main-footer').style.display = noFooter.includes(name) ? 'none' : '';
+}
+
+function requireAuth(page){
+  if(!currentUser){ toast('Please login first', 'error'); showPage('login'); return; }
+  showPage(page);
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if(!email || !pw){ toast('Fill all fields', 'error'); return; }
+  const user = allUsers.find(u => u.email === email.toLowerCase() && u.password === btoa(pw));
+  if(!user){ toast('Invalid email or password', 'error'); return; }
+  currentUser = user;
+  localStorage.setItem('igd_user', JSON.stringify(user));
+  updateNavAuth();
+  toast('Welcome back, @' + user.username + '!', 'success');
+  showPage('dashboard');
+}
+
+function doSignup(){
+  const name = document.getElementById('su-name').value.trim();
+  const user = document.getElementById('su-user').value.trim().toLowerCase();
+  const email = document.getElementById('su-email').value.trim().toLowerCase();
+  const pw = document.getElementById('su-pw').value;
+  let valid = true;
+  document.getElementById('err-name').textContent = '';
+  document.getElementById('err-user').textContent = '';
+  document.getElementById('err-email').textContent = '';
+  if(!name){ document.getElementById('err-name').textContent = 'Full name is required'; valid=false; }
+  if(!user || !/^[a-z0-9_.]{3,20}$/.test(user)){ document.getElementById('err-user').textContent = 'Username: 3-20 chars, letters/numbers/._'; valid=false; }
+  if(allUsers.find(u=>u.username===user)){ document.getElementById('err-user').textContent = 'Username is not available.'; valid=false; }
+  if(!email || !/\S+@\S+\.\S+/.test(email)){ document.getElementById('err-email').textContent = 'Invalid email'; valid=false; }
+  if(allUsers.find(u=>u.email===email)){ document.getElementById('err-email').textContent = 'Email already registered'; valid=false; }
+  if(pw.length < 8 || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw)){ toast('Password does not meet requirements', 'error'); valid=false; }
+  if(!valid) return;
+  // Simulate OTP
+  const otp = Math.floor(100000+Math.random()*900000).toString();
+  window._pendingSignup = {name, username:user, email, password:btoa(pw), otp, earnings:0, plays:0, balance:0, id:'u_'+Date.now(), createdAt:new Date().toISOString(), bio:''};
+  document.getElementById('otp-sub').textContent = `Code sent to ${email} (demo: ${otp})`;
+  document.getElementById('signup-step1').classList.add('hidden');
+  document.getElementById('signup-step2').classList.remove('hidden');
+  toast(`OTP: ${otp} (shown for demo)`, 'info');
+}
+
+function verifyOTP(){
+  const entered = document.getElementById('otp-input').value.trim();
+  const pending = window._pendingSignup;
+  if(!pending){ toast('Start signup again', 'error'); return; }
+  if(entered !== pending.otp){ toast('Invalid OTP code', 'error'); return; }
+  allUsers.push(pending);
+  currentUser = pending;
+  saveData();
+  updateNavAuth();
+  toast('Account created! Welcome, @' + pending.username, 'success');
+  showPage('dashboard');
+  document.getElementById('otp-input').value = '';
+  document.getElementById('signup-step1').classList.remove('hidden');
+  document.getElementById('signup-step2').classList.add('hidden');
+  window._pendingSignup = null;
+}
+
+function logout(){
+  currentUser = null;
+  localStorage.removeItem('igd_user');
+  updateNavAuth();
+  toast('Logged out', 'info');
+  showPage('home');
+  closeDropdown();
+}
+
+function updateNavAuth(){
+  const authEl = document.getElementById('nav-auth');
+  const userEl = document.getElementById('nav-user');
+  if(currentUser){
+    authEl.classList.add('hidden');
+    userEl.classList.remove('hidden');
+    document.getElementById('nav-avatar').textContent = currentUser.username.charAt(0).toUpperCase();
+    document.getElementById('nav-username').textContent = currentUser.username;
+  } else {
+    authEl.classList.remove('hidden');
+    userEl.classList.add('hidden');
+  }
+}
+
+function checkPwRules(){
+  const pw = document.getElementById('su-pw').value;
+  const set = (id, ok)=>{ const el=document.getElementById(id); el.className='pw-rule '+(ok?'ok':'no'); el.textContent=(ok?'✓':'○')+el.textContent.slice(1); };
+  set('r-len', pw.length>=8);
+  set('r-num', /[0-9]/.test(pw));
+  set('r-upper', /[A-Z]/.test(pw));
+}
+
+function checkUsername(){
+  const user = document.getElementById('su-user').value.trim().toLowerCase();
+  const err = document.getElementById('err-user');
+  if(allUsers.find(u=>u.username===user)) err.textContent = 'Username is not available.';
+  else err.textContent = '';
+}
+
+const navUserEl = document.getElementById('nav-user');
+navUserEl.addEventListener('click', function(e){
+  const dd = document.getElementById('user-dropdown');
+  dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+  e.stopPropagation();
+});
+document.addEventListener('click', closeDropdown);
+function closeDropdown(){ document.getElementById('user-dropdown').style.display='none'; }
+
+function toggleMobileMenu(){ document.getElementById('mobile-menu').classList.toggle('open'); }
+function closeMobileMenu(){ document.getElementById('mobile-menu').classList.remove('open'); }
+
+// ============================================================
+// GAMES
+// ============================================================
+function renderGameCard(game, onclick){
+  const creator = allUsers.find(u=>u.id===game.creatorId) || {username:'unknown'};
+  const isNew = (Date.now()-new Date(game.createdAt).getTime()) < 10*24*60*60*1000;
+  return `<div class="game-card" onclick="${onclick}">
+    <div class="game-thumb">
+      ${game.thumbnail ? `<img src="${game.thumbnail}" alt="${game.title}"/>` : '<span style="font-size:40px;">🎮</span>'}
+      ${isNew ? '<span class="new-badge">NEW</span>' : ''}
+      <div class="game-play-overlay"><span style="color:var(--neon);font-size:24px;font-family:Orbitron,monospace;">▶</span></div>
+    </div>
+    <div class="game-info">
+      <div class="game-title">${game.title}</div>
+      <div class="game-creator">@${creator.username}</div>
+      <div class="game-meta"><span>👁 ${(game.plays||0).toLocaleString()}</span><span>♡ ${game.likes||0}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderHomeGames(){
+  const grid = document.getElementById('home-games-grid');
+  const recent = [...allGames].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
+  if(recent.length===0){ grid.innerHTML='<p style="color:var(--text2);font-size:13px;grid-column:1/-1;">No games yet. Be the first to create one!</p>'; return; }
+  grid.innerHTML = recent.map(g=>renderGameCard(g, `openGameDetail('${g.id}')`)).join('');
+}
+
+function renderGamesPage(){
+  filterGames();
+}
+
+function filterGames(){
+  const search = (document.getElementById('games-search')?.value||'').toLowerCase();
+  const sort = document.getElementById('games-sort')?.value||'newest';
+  let games = allGames.filter(g => {
+    const matchSearch = !search || g.title.toLowerCase().includes(search);
+    const matchGenre = selectedGenre==='All' || g.genre===selectedGenre;
+    return matchSearch && matchGenre;
+  });
+  if(sort==='popular') games.sort((a,b)=>(b.plays||0)-(a.plays||0));
+  else games.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  document.getElementById('games-count').textContent = `Found ${games.length} games`;
+  const grid = document.getElementById('all-games-grid');
+  if(games.length===0){
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">🎮</div><h3>No Games Found</h3><p>Try different search</p></div>`;
+    return;
+  }
+  grid.innerHTML = games.map(g=>renderGameCard(g, `openGameDetail('${g.id}')`)).join('');
+}
+
+function setGenre(btn, genre){
+  selectedGenre = genre;
+  document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterGames();
+}
+
+function goToCreator(){
+  const u = document.getElementById('profile-search').value.trim().toLowerCase();
+  if(!u){ toast('Enter a username', 'error'); return; }
+  const user = allUsers.find(uu=>uu.username===u);
+  if(!user){ toast('User not found', 'error'); return; }
+  window._viewingUser = user;
+  showPage('profile');
+}
+
+function openGameDetail(id){
+  currentGame = allGames.find(g=>g.id===id);
+  if(!currentGame){ toast('Game not found', 'error'); return; }
+  const creator = allUsers.find(u=>u.id===currentGame.creatorId)||{username:'unknown'};
+  document.getElementById('gd-title').textContent = currentGame.title;
+  document.getElementById('gd-creator').innerHTML = `<span onclick="viewCreator('${creator.id}')">👤 @${creator.username}</span>`;
+  document.getElementById('gd-desc').textContent = currentGame.description || '';
+  document.getElementById('gd-stats').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text2);">👁 Plays</span><strong>${(currentGame.plays||0).toLocaleString()}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text2);">🏷 Genre</span><strong>${currentGame.genre||'Game'}</strong></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2);">📅 Published</span><strong>${new Date(currentGame.createdAt).toLocaleDateString()}</strong></div>`;
+  document.getElementById('like-count').textContent = currentGame.likes||0;
+  document.getElementById('game-placeholder').style.display='flex';
+  document.getElementById('game-canvas').style.display='none';
+  document.getElementById('controls-hint').classList.add('hidden');
+  showPage('game-detail');
+}
+
+function viewCreator(uid){
+  const user = allUsers.find(u=>u.id===uid);
+  if(user){ window._viewingUser=user; showPage('profile'); }
+}
+
+function startGamePlay(){
+  if(!currentGame) return;
+  // Record play
+  currentGame.plays = (currentGame.plays||0)+1;
+  const creator = allUsers.find(u=>u.id===currentGame.creatorId);
+  if(creator){
+    creator.plays = (creator.plays||0)+1;
+    if(currentGame.plays % 200 === 0){ creator.earnings=(creator.earnings||0)+1; creator.balance=(creator.balance||0)+1; }
+    if(currentUser && currentUser.id===creator.id){ currentUser=creator; localStorage.setItem('igd_user',JSON.stringify(currentUser)); }
+  }
+  saveData();
+  document.getElementById('game-placeholder').style.display='none';
+  const canvas = document.getElementById('game-canvas');
+  canvas.style.display='block';
+  canvas.width=800; canvas.height=500;
+  document.getElementById('controls-hint').classList.remove('hidden');
+  runGame(canvas, currentGame.objects||[], currentGame.events||[]);
+}
+
+function stopGamePlay(){ if(gameRAF){ cancelAnimationFrame(gameRAF); gameRAF=null; } }
+
+function likeGame(){
+  if(!currentGame) return;
+  currentGame.likes = (currentGame.likes||0)+1;
+  document.getElementById('like-count').textContent=currentGame.likes;
+  document.getElementById('like-btn').style.color='var(--pink)';
+  saveData();
+  toast('Liked! ♥', 'success');
+}
+
+// ============================================================
+// GAME RUNNER ENGINE
+// ============================================================
+function runGame(canvas, initialObjects, events){
+  const ctx = canvas.getContext('2d');
+  const state = {
+    objects: initialObjects.map(o=>({...o,velX:0,velY:0,onGround:false})),
+    keys:{}, running:true, score:0
+  };
+  const kd=e=>{state.keys[e.code]=true;};
+  const ku=e=>{state.keys[e.code]=false;};
+  window.addEventListener('keydown',kd);
+  window.addEventListener('keyup',ku);
+
+  function loop(){
+    if(!state.running) return;
+    ctx.clearRect(0,0,800,500);
+    ctx.fillStyle='#0a1020'; ctx.fillRect(0,0,800,500);
+    ctx.strokeStyle='rgba(0,212,255,0.04)'; ctx.lineWidth=1;
+    for(let x=0;x<800;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,500);ctx.stroke();}
+    for(let y=0;y<500;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
+
+    events.forEach(ev=>{
+      const tgt=state.objects.find(o=>o.id===ev.targetId); if(!tgt)return;
+      const L=state.keys['ArrowLeft']||state.keys['KeyA'];
+      const R=state.keys['ArrowRight']||state.keys['KeyD'];
+      const J=state.keys['Space']||state.keys['ArrowUp']||state.keys['KeyW'];
+      if(ev.trigger==='key_left'&&L) tgt.velX=-(tgt.speed||3);
+      if(ev.trigger==='key_right'&&R) tgt.velX=(tgt.speed||3);
+      if(ev.trigger==='key_space'&&J){
+        if(ev.action==='jump'&&tgt.onGround){tgt.velY=-12;tgt.onGround=false;}
+        if(ev.action==='shoot'){
+          state.objects.push({id:'b_'+Date.now(),x:tgt.x+tgt.w/2-4,y:tgt.y-12,w:8,h:16,color:'#ffdd00',velX:0,velY:-10,gravity:0,speed:0,onGround:false,opacity:1});
+        }
+      }
+    });
+
+    state.objects=state.objects.filter(o=>o.y<600&&o.y>-300);
+    state.objects.forEach(obj=>{
+      if(obj.gravity) obj.velY+=obj.gravity;
+      obj.x+=(obj.velX||0); obj.y+=(obj.velY||0);
+      obj.velX=(obj.velX||0)*0.82;
+      if(obj.gravity){
+        state.objects.forEach(pl=>{
+          if(pl.id!==obj.id&&!pl.gravity&&(pl.w||0)>50){
+            if(obj.x<pl.x+pl.w&&obj.x+obj.w>pl.x&&obj.y+obj.h>=pl.y&&obj.y+obj.h<=pl.y+pl.h+8&&(obj.velY||0)>=0){
+              obj.y=pl.y-obj.h; obj.velY=0; obj.onGround=true;
+            }
+          }
+        });
+        if(obj.y+obj.h>=500){obj.y=500-obj.h;obj.velY=0;obj.onGround=true;}
+        if(obj.x<0)obj.x=0; if(obj.x+obj.w>800)obj.x=800-obj.w;
+      }
+      ctx.globalAlpha=obj.opacity!==undefined?obj.opacity:1;
+      ctx.fillStyle=obj.color||'#00d4ff';
+      ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
+      ctx.globalAlpha=1;
+    });
+
+    ctx.fillStyle='#00d4ff'; ctx.font='bold 13px Orbitron,monospace';
+    ctx.fillText('Score: '+state.score,10,22);
+    ctx.fillStyle='rgba(0,212,255,0.35)'; ctx.font='10px Orbitron,monospace';
+    ctx.fillText('Arrow/WASD = Move | Space = Jump/Shoot',10,490);
+
+    gameRAF=requestAnimationFrame(loop);
+  }
+  loop();
+  canvas.addEventListener('click',()=>canvas.focus());
+
+  // Return cleanup
+  const cleanup=()=>{state.running=false;window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);};
+  window._stopGame=cleanup;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(){
+  if(!currentUser) return;
+  document.getElementById('dash-username').textContent = '@'+currentUser.username;
+  const myGames = allGames.filter(g=>g.creatorId===currentUser.id);
+  document.getElementById('ds-earnings').textContent = '$'+(currentUser.earnings||0).toFixed(2);
+  document.getElementById('ds-plays').textContent = (currentUser.plays||0).toLocaleString();
+  document.getElementById('ds-games').textContent = myGames.length;
+  document.getElementById('ds-balance').textContent = '$'+(currentUser.balance||0).toFixed(2);
+  const bal = currentUser.balance||0;
+  const wbtn = document.getElementById('withdraw-btn');
+  const wnote = document.getElementById('withdraw-note');
+  if(bal<5){ wbtn.disabled=true; wbtn.style.opacity='.4'; wnote.style.display='block'; wnote.textContent=`Need $${(5-bal).toFixed(2)} more for minimum $5 withdrawal`; }
+  else { wbtn.disabled=false; wbtn.style.opacity='1'; wnote.style.display='none'; }
+}
+
+// ============================================================
+// YOUR GAMES
+// ============================================================
+function renderYourGames(){
+  if(!currentUser) return;
+  const myFolders = allFolders.filter(f=>f.userId===currentUser.id);
+  const fl = document.getElementById('folders-list');
+  if(myFolders.length===0){
+    fl.innerHTML='<p style="font-size:12px;color:var(--text2);padding:12px;">No folders yet.</p>';
+  } else {
+    fl.innerHTML = myFolders.map(f=>`<div class="folder-item" onclick="selectFolder('${f.id}')" id="folder-${f.id}">📁 ${f.name}</div>`).join('');
+  }
+  // Update folder select in lab
+  const fs = document.getElementById('folder-select');
+  fs.innerHTML='<option value="">Select Folder</option>'+myFolders.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+}
+
+function selectFolder(fid){
+  document.querySelectorAll('.folder-item').forEach(f=>f.classList.remove('active'));
+  const el = document.getElementById('folder-'+fid);
+  if(el) el.classList.add('active');
+  const projects = allProjects.filter(p=>p.folderId===fid&&p.userId===currentUser.id);
+  const area = document.getElementById('projects-area');
+  if(projects.length===0){
+    area.innerHTML='<div class="empty"><div class="empty-icon">📦</div><h3>No Projects</h3><p>No projects in this folder yet</p><button class="btn btn-primary btn-sm" onclick="showPage(\'lab\')">Create Game</button></div>';
+    return;
+  }
+  area.innerHTML='<div class="projects-grid">'+projects.map(p=>`
+    <div class="proj-card glass">
+      <div style="font-size:28px;margin-bottom:8px;">🎮</div>
+      <div class="font-display" style="font-size:12px;margin-bottom:6px;">${p.name}</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">${p.objects.length} objects · ${p.events.length} events</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">${new Date(p.updatedAt||p.createdAt).toLocaleDateString()}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm flex-1" onclick="loadProjectToLab('${p.id}')">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">🗑</button>
+      </div>
+      ${p.published?'<div style="margin-top:8px;text-align:center;font-size:11px;color:var(--green);border:1px solid rgba(0,255,136,0.3);border-radius:4px;padding:2px;">✓ Published</div>':''}
+    </div>`).join('')+'</div>';
+}
+
+function loadProjectToLab(pid){
+  const proj = allProjects.find(p=>p.id===pid);
+  if(!proj) return;
+  labObjects = proj.objects.map(o=>({...o}));
+  labEvents = proj.events.map(e=>({...e}));
+  document.getElementById('proj-name').value = proj.name;
+  currentProjectId = pid;
+  showPage('lab');
+}
+
+function deleteProject(pid){
+  if(!confirm('Delete this project?')) return;
+  allProjects = allProjects.filter(p=>p.id!==pid);
+  saveData();
+  toast('Project deleted', 'info');
+  renderYourGames();
+}
+
+function openCreateFolderModal(){ document.getElementById('folder-modal').classList.add('open'); }
+
+function createFolder(){
+  const name = document.getElementById('new-folder-name').value.trim();
+  if(!name){ toast('Enter folder name', 'error'); return; }
+  const folder = {id:'f_'+Date.now(), name, userId:currentUser.id, createdAt:new Date().toISOString()};
+  allFolders.push(folder);
+  saveData();
+  closeModal('folder-modal');
+  document.getElementById('new-folder-name').value='';
+  renderYourGames();
+  toast('Folder created!', 'success');
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function renderProfile(){
+  const user = window._viewingUser || currentUser;
+  if(!user){ showPage('login'); return; }
+  window._viewingUser = null;
+  const myGames = allGames.filter(g=>g.creatorId===user.id);
+  document.getElementById('pro-avatar').textContent = user.username.charAt(0).toUpperCase();
+  document.getElementById('pro-fullname').textContent = user.fullName || user.username;
+  document.getElementById('pro-username').textContent = '@'+user.username;
+  document.getElementById('pro-bio').textContent = user.bio || '';
+  document.getElementById('pro-games').textContent = myGames.length;
+  document.getElementById('pro-plays').textContent = (user.plays||0).toLocaleString();
+  const grid = document.getElementById('profile-games-grid');
+  if(myGames.length===0){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">🎮</div><p style="color:var(--text2);">No published games yet</p></div>';
+    return;
+  }
+  grid.innerHTML = myGames.map(g=>renderGameCard(g, `openGameDetail('${g.id}')`)).join('');
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettings(){
+  if(!currentUser) return;
+  document.getElementById('st-username').value = currentUser.username;
+  document.getElementById('st-fullname').value = currentUser.fullName||'';
+  document.getElementById('st-bio').value = currentUser.bio||'';
+  // Apply saved theme
+  const saved = localStorage.getItem('igd_theme')||'dark-pro';
+  applyTheme(saved, false);
+}
+
+function switchSettingsTab(tab){
+  ['profile','password','themes','danger'].forEach(t=>{
+    document.getElementById('st-'+t).classList.toggle('hidden', t!==tab);
+  });
+  document.querySelectorAll('.settings-tab').forEach(b=>{
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(tab) || (tab==='profile'&&b.textContent.includes('Profile')));
+  });
+}
+
+function saveProfile(){
+  if(!currentUser) return;
+  currentUser.fullName = document.getElementById('st-fullname').value.trim();
+  currentUser.bio = document.getElementById('st-bio').value.trim();
+  const idx = allUsers.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0) allUsers[idx]=currentUser;
+  saveData();
+  toast('Profile updated!', 'success');
+}
+
+function changePassword(){
+  const cur=document.getElementById('pw-current').value;
+  const nw=document.getElementById('pw-new').value;
+  const cf=document.getElementById('pw-confirm').value;
+  if(!currentUser||btoa(cur)!==currentUser.password){ toast('Current password incorrect', 'error'); return; }
+  if(nw!==cf){ toast('Passwords do not match', 'error'); return; }
+  if(nw.length<8||!/[A-Z]/.test(nw)||!/[0-9]/.test(nw)){ toast('New password too weak', 'error'); return; }
+  currentUser.password = btoa(nw);
+  const idx = allUsers.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0) allUsers[idx]=currentUser;
+  saveData();
+  document.getElementById('pw-current').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  toast('Password changed!', 'success');
+}
+
+function deleteAccount(){
+  const confirm_val = document.getElementById('delete-confirm').value.trim();
+  if(confirm_val !== currentUser.username){ toast('Username does not match', 'error'); return; }
+  if(!confirm('Are you absolutely sure? This cannot be undone.')){ return; }
+  allUsers = allUsers.filter(u=>u.id!==currentUser.id);
+  allGames = allGames.filter(g=>g.creatorId!==currentUser.id);
+  allProjects = allProjects.filter(p=>p.userId!==currentUser.id);
+  allFolders = allFolders.filter(f=>f.userId!==currentUser.id);
+  currentUser = null;
+  localStorage.removeItem('igd_user');
+  saveData();
+  updateNavAuth();
+  toast('Account deleted', 'info');
+  showPage('home');
+}
+
+const themeConfigs = {
+  'dark-pro':    {'--bg':'#050a10','--bg2':'#0a1525','--bg3':'#0d1b2a','--border':'rgba(0,212,255,0.2)','--text':'#e0f4ff','--text2':'#7ab8d4','--neon':'#00d4ff'},
+  'midnight-blue':{'--bg':'#020818','--bg2':'#071229','--bg3':'#0a1a3d','--border':'rgba(64,128,255,0.3)','--text':'#ccd6f6','--text2':'#8892b0','--neon':'#4080ff'},
+  'cyber-purple': {'--bg':'#0a0514','--bg2':'#12082a','--bg3':'#1a0d3d','--border':'rgba(191,0,255,0.3)','--text':'#f0e6ff','--text2':'#b388ff','--neon':'#bf00ff'},
+  'neon-tech':    {'--bg':'#001a0a','--bg2':'#003315','--bg3':'#004d1f','--border':'rgba(0,255,136,0.3)','--text':'#e0ffe8','--text2':'#80ffaa','--neon':'#00ff88'},
+  'light-minimal':{'--bg':'#f8fafc','--bg2':'#f1f5f9','--bg3':'#ffffff','--border':'rgba(15,23,42,0.15)','--text':'#0f172a','--text2':'#475569','--neon':'#0ea5e9'},
+  'matrix-green': {'--bg':'#000a00','--bg2':'#001400','--bg3':'#001e00','--border':'rgba(0,255,0,0.2)','--text':'#00ff00','--text2':'#00aa00','--neon':'#00ff00'},
+};
+
+function applyTheme(name, save=true){
+  const config = themeConfigs[name] || themeConfigs['dark-pro'];
+  const root = document.documentElement;
+  Object.entries(config).forEach(([k,v])=>root.style.setProperty(k,v));
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('active'));
+  const el = document.getElementById('theme-'+name);
+  if(el) el.classList.add('active');
+  if(save) localStorage.setItem('igd_theme', name);
+}
+
+// ============================================================
+// LAB ENGINE
+// ============================================================
+function initLab(){
+  if(!currentUser) return;
+  renderFolderSelect();
+  renderLabCanvas();
+  renderObjectsList();
+  renderPropsPanel();
+  renderEventsTable();
+}
+
+function renderFolderSelect(){
+  const myFolders = allFolders.filter(f=>f.userId===currentUser.id);
+  const fs = document.getElementById('folder-select');
+  fs.innerHTML='<option value="">Select Folder</option>'+myFolders.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+  if(currentProjectId){
+    const proj = allProjects.find(p=>p.id===currentProjectId);
+    if(proj) fs.value=proj.folderId;
+  }
+}
+
+function renderLabCanvas(){
+  const canvas = document.getElementById('lab-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,800,500);
+  ctx.fillStyle='#0a1020'; ctx.fillRect(0,0,800,500);
+  // Grid
+  ctx.strokeStyle='rgba(0,212,255,0.05)'; ctx.lineWidth=1;
+  for(let x=0;x<800;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,500);ctx.stroke();}
+  for(let y=0;y<500;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
+  // Objects
+  labObjects.forEach(obj=>{
+    const sel = obj.id===selectedObjId;
+    ctx.globalAlpha=obj.opacity!==undefined?obj.opacity:1;
+    ctx.fillStyle=obj.color||'#00d4ff';
+    ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
+    ctx.globalAlpha=1;
+    if(sel){
+      ctx.strokeStyle='#00d4ff'; ctx.lineWidth=2;
+      ctx.strokeRect(obj.x-1,obj.y-1,obj.w+2,obj.h+2);
+      // Resize handle
+      ctx.fillStyle='#00d4ff'; ctx.fillRect(obj.x+obj.w-5,obj.y+obj.h-5,8,8);
+      // Label
+      ctx.fillStyle='#00d4ff'; ctx.font='bold 10px Orbitron,monospace';
+      ctx.fillText(obj.name,obj.x,obj.y-5);
+    }
+  });
+  // Empty hint
+  if(labObjects.length===0){
+    ctx.fillStyle='rgba(0,212,255,0.3)'; ctx.font='14px Orbitron,monospace'; ctx.textAlign='center';
+    ctx.fillText('Add objects or load a template',400,240);
+    ctx.textAlign='left';
+  }
+  document.getElementById('obj-count').textContent=labObjects.length;
+  const sel=labObjects.find(o=>o.id===selectedObjId);
+  document.getElementById('selected-info').textContent=sel?`Selected: ${sel.name} (${Math.round(sel.x)},${Math.round(sel.y)})`:'';
+}
+
+function canvasMouseDown(e){
+  const canvas=document.getElementById('lab-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=800/rect.width, scaleY=500/rect.height;
+  const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  const hit=[...labObjects].reverse().find(o=>mx>=o.x&&mx<=o.x+o.w&&my>=o.y&&my<=o.y+o.h);
+  if(hit){
+    selectedObjId=hit.id;
+    dragState={active:true,id:hit.id,startX:mx,startY:my,objX:hit.x,objY:hit.y};
+    renderObjectsList(); renderPropsPanel();
+  } else {
+    selectedObjId=null; renderObjectsList(); renderPropsPanel();
+  }
+  renderLabCanvas();
+}
+
+function canvasMouseMove(e){
+  if(!dragState.active) return;
+  const canvas=document.getElementById('lab-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=800/rect.width, scaleY=500/rect.height;
+  const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  const obj=labObjects.find(o=>o.id===dragState.id);
+  if(obj){ obj.x=dragState.objX+(mx-dragState.startX); obj.y=dragState.objY+(my-dragState.startY); }
+  renderLabCanvas();
+}
+
+function canvasMouseUp(){
+  if(dragState.active){ pushHistory(); dragState.active=false; }
+}
+
+function pushHistory(){
+  history = history.slice(0,historyIdx+1);
+  history.push({objects:JSON.parse(JSON.stringify(labObjects)),events:JSON.parse(JSON.stringify(labEvents))});
+  historyIdx=history.length-1;
+}
+
+function undoAction(){
+  if(historyIdx>0){ historyIdx--; const s=history[historyIdx]; labObjects=JSON.parse(JSON.stringify(s.objects)); labEvents=JSON.parse(JSON.stringify(s.events)); renderLabCanvas(); renderObjectsList(); renderEventsTable(); }
+}
+
+function redoAction(){
+  if(historyIdx<history.length-1){ historyIdx++; const s=history[historyIdx]; labObjects=JSON.parse(JSON.stringify(s.objects)); labEvents=JSON.parse(JSON.stringify(s.events)); renderLabCanvas(); renderObjectsList(); renderEventsTable(); }
+}
+
+function addObject(){
+  pushHistory();
+  const colors=['#00d4ff','#00ff88','#ff0080','#ffdd00','#bf00ff','#ff8800'];
+  const obj={id:'obj_'+Date.now(),name:'Object '+(labObjects.length+1),x:80+Math.random()*200,y:80+Math.random()*200,w:60,h:60,color:colors[Math.floor(Math.random()*colors.length)],speed:3,gravity:0,opacity:1,rotation:0};
+  labObjects.push(obj);
+  selectedObjId=obj.id;
+  renderLabCanvas(); renderObjectsList(); renderPropsPanel();
+  toast('Object added', 'success');
+}
+
+function deleteObj(id){
+  pushHistory();
+  labObjects=labObjects.filter(o=>o.id!==id);
+  if(selectedObjId===id) selectedObjId=null;
+  renderLabCanvas(); renderObjectsList(); renderPropsPanel();
+}
+
+function renderObjectsList(){
+  const list=document.getElementById('objects-list');
+  if(labObjects.length===0){ list.innerHTML='<p style="font-size:11px;color:var(--text2);text-align:center;padding:16px 0;">No objects yet</p>'; return; }
+  list.innerHTML=labObjects.map(obj=>`
+    <div class="obj-item ${obj.id===selectedObjId?'selected':''}" onclick="selectObj('${obj.id}')">
+      <div class="obj-color" style="background:${obj.color}"></div>
+      <span class="obj-name">${obj.name}</span>
+      <span class="obj-del" onclick="event.stopPropagation();deleteObj('${obj.id}')">✕</span>
+    </div>`).join('');
+}
+
+function selectObj(id){ selectedObjId=id; renderLabCanvas(); renderObjectsList(); renderPropsPanel(); }
+
+function renderPropsPanel(){
+  const body=document.getElementById('props-body');
+  const obj=labObjects.find(o=>o.id===selectedObjId);
+  if(!obj){ body.innerHTML='<p style="font-size:11px;color:var(--text2);text-align:center;padding:20px 0;">Click an object<br>to edit properties</p>'; return; }
+  const prop=(label,key,type='number')=>`
+    <div class="prop-row">
+      <div class="prop-label">${label}</div>
+      ${type==='color'
+        ?`<input type="color" class="prop-input" value="${obj[key]||'#00d4ff'}" onchange="updateProp('${obj.id}','${key}',this.value)" style="height:28px;cursor:pointer;padding:2px;"/>`
+        :`<input type="${type}" class="prop-input" value="${typeof obj[key]==='number'?Math.round(obj[key]*100)/100:obj[key]||''}" step="${key==='opacity'?'0.1':'1'}" ${key==='opacity'?'min="0" max="1"':''} onchange="updateProp('${obj.id}','${key}',${type==='number'?'parseFloat(this.value)||0':'this.value'})"/>`
+      }
+    </div>`;
+  body.innerHTML=`
+    <div class="prop-row"><div class="prop-label">Name</div><input type="text" class="prop-input" value="${obj.name}" onchange="updateProp('${obj.id}','name',this.value)"/></div>
+    ${prop('Position X','x')}${prop('Position Y','y')}${prop('Width','w')}${prop('Height','h')}
+    ${prop('Rotation','rotation')}${prop('Opacity','opacity')}${prop('Speed','speed')}${prop('Gravity','gravity')}
+    ${prop('Color','color','color')}
+    <button class="btn btn-danger w-full btn-sm mt-2" onclick="deleteObj('${obj.id}')">🗑 Delete</button>`;
+}
+
+function updateProp(id,key,val){
+  const obj=labObjects.find(o=>o.id===id); if(!obj)return;
+  obj[key]=val; renderLabCanvas(); if(key==='name')renderObjectsList();
+}
+
+const TRIGGERS=['key_left','key_right','key_up','key_down','key_space','collision','timer','score_reaches','game_start'];
+const ACTIONS=['move_left','move_right','jump','shoot','destroy','win','lose','spawn_object','add_score'];
+
+function addEvent(){
+  labEvents.push({id:'ev_'+Date.now(),trigger:'key_space',condition:'',action:'jump',targetId:labObjects[0]?.id||'',value:''});
+  renderEventsTable();
+}
+
+function deleteEvent(id){ labEvents=labEvents.filter(e=>e.id!==id); renderEventsTable(); }
+
+function updateEvent(id,key,val){ const ev=labEvents.find(e=>e.id===id); if(ev)ev[key]=val; }
+
+function renderEventsTable(){
+  const tbody=document.getElementById('events-tbody');
+  if(labEvents.length===0){
+    tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:12px;color:var(--text2);font-size:11px;">No events yet. Click + New Event to add game logic.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=labEvents.map((ev,i)=>`
+    <tr>
+      <td><span class="ev-num">${i+1}</span></td>
+      <td><select onchange="updateEvent('${ev.id}','trigger',this.value)">
+        ${TRIGGERS.map(t=>`<option value="${t}" ${ev.trigger===t?'selected':''}>${t}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${ev.condition||''}" placeholder="e.g. score>10" onchange="updateEvent('${ev.id}','condition',this.value)" style="width:90px;"/></td>
+      <td><select onchange="updateEvent('${ev.id}','action',this.value)">
+        ${ACTIONS.map(a=>`<option value="${a}" ${ev.action===a?'selected':''}>${a}</option>`).join('')}
+      </select></td>
+      <td><select onchange="updateEvent('${ev.id}','targetId',this.value)">
+        <option value="">-- Object --</option>
+        ${labObjects.map(o=>`<option value="${o.id}" ${ev.targetId===o.id?'selected':''}>${o.name}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${ev.value||''}" placeholder="value" onchange="updateEvent('${ev.id}','value',this.value)" style="width:60px;"/></td>
+      <td><span class="ev-del" onclick="deleteEvent('${ev.id}')">✕</span></td>
+    </tr>`).join('');
+}
+
+function switchLabTab(btn, tab){
+  document.querySelectorAll('.lab-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lab-panel-objects').classList.toggle('hidden', tab!=='objects');
+  document.getElementById('lab-panel-assets').classList.toggle('hidden', tab!=='assets');
+}
+
+function uploadAsset(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const url=ev.target.result;
+    pushHistory();
+    const obj={id:'obj_'+Date.now(),name:file.name.split('.')[0],x:100,y:100,w:64,h:64,color:'#888',speed:0,gravity:0,opacity:1,rotation:0,image:url};
+    labObjects.push(obj);
+    selectedObjId=obj.id;
+    renderLabCanvas(); renderObjectsList(); renderPropsPanel();
+    const al=document.getElementById('assets-list');
+    al.innerHTML+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;"><img src="${url}" style="width:24px;height:24px;object-fit:cover;border-radius:3px;"/><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${obj.name}</span></div>`;
+    toast('Asset uploaded!','success');
+  };
+  reader.readAsDataURL(file);
+}
+
+const TEMPLATES={
+  empty:{name:'Empty Project',objects:[],events:[]},
+  platformer:{
+    name:'Platformer',
+    objects:[
+      {id:'player',name:'Player',x:80,y:320,w:40,h:40,color:'#00d4ff',speed:5,gravity:0.5,opacity:1,rotation:0},
+      {id:'ground',name:'Ground',x:0,y:440,w:800,h:40,color:'#4a7c59',speed:0,gravity:0,opacity:1,rotation:0},
+      {id:'platform1',name:'Platform 1',x:150,y:350,w:160,h:20,color:'#7a5c39',speed:0,gravity:0,opacity:1,rotation:0},
+    ],
+    events:[
+      {id:'e1',trigger:'key_left',condition:'',action:'move_left',targetId:'player',value:''},
+      {id:'e2',trigger:'key_right',condition:'',action:'move_right',targetId:'player',value:''},
+      {id:'e3',trigger:'key_space',condition:'',action:'jump',targetId:'player',value:''},
+    ]
+  },
+  shooter:{
+    name:'Shooter',
+    objects:[{id:'ship',name:'Ship',x:360,y:380,w:50,h:50,color:'#00ff88',speed:6,gravity:0,opacity:1,rotation:0}],
+    events:[
+      {id:'e1',trigger:'key_left',condition:'',action:'move_left',targetId:'ship',value:''},
+      {id:'e2',trigger:'key_right',condition:'',action:'move_right',targetId:'ship',value:''},
+      {id:'e3',trigger:'key_space',condition:'',action:'shoot',targetId:'ship',value:''},
+    ]
+  },
+  runner:{
+    name:'Endless Runner',
+    objects:[
+      {id:'runner',name:'Runner',x:80,y:330,w:36,h:50,color:'#ff8800',speed:3,gravity:0.5,opacity:1,rotation:0},
+      {id:'floor',name:'Floor',x:0,y:430,w:800,h:30,color:'#555',speed:0,gravity:0,opacity:1,rotation:0},
+    ],
+    events:[{id:'e1',trigger:'key_space',condition:'',action:'jump',targetId:'runner',value:''}]
+  }
+};
+
+function loadTemplate(key){
+  const t=TEMPLATES[key]||TEMPLATES.empty;
+  pushHistory();
+  labObjects=t.objects.map(o=>({...o,id:o.id+'_'+Date.now()}));
+  labEvents=t.events.map((e,i)=>({...e,id:'ev_'+Date.now()+i,targetId:labObjects[0]?.id||''}));
+  document.getElementById('proj-name').value=t.name;
+  renderLabCanvas(); renderObjectsList(); renderEventsTable(); renderPropsPanel();
+  toast('Template loaded: '+t.name,'success');
+}
+
+function saveProject(){
+  if(!currentUser){ toast('Login required','error'); return; }
+  const folderId=document.getElementById('folder-select').value;
+  if(!folderId){ toast('Select a folder first','error'); openCreateFolderModal(); return; }
+  const name=document.getElementById('proj-name').value||'My Game';
+  if(currentProjectId){
+    const idx=allProjects.findIndex(p=>p.id===currentProjectId);
+    if(idx>=0){ allProjects[idx]={...allProjects[idx],name,objects:labObjects,events:labEvents,folderId,updatedAt:new Date().toISOString()}; }
+  } else {
+    const proj={id:'p_'+Date.now(),name,userId:currentUser.id,folderId,objects:labObjects,events:labEvents,published:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    allProjects.push(proj);
+    currentProjectId=proj.id;
+  }
+  saveData();
+  toast('Project saved!','success');
+}
+
+function openPreview(){ document.getElementById('preview-modal').classList.add('open'); startPreview(); }
+
+function startPreview(){
+  stopPreview();
+  const canvas=document.getElementById('preview-canvas');
+  canvas.width=800; canvas.height=500;
+  const objs=labObjects.map(o=>({...o,velX:0,velY:0,onGround:false}));
+  const evs=labEvents;
+  const ctx=canvas.getContext('2d');
+  const state={objects:objs,keys:{},running:true,score:0};
+  const kd=e=>{state.keys[e.code]=true;};
+  const ku=e=>{state.keys[e.code]=false;};
+  window.addEventListener('keydown',kd);
+  window.addEventListener('keyup',ku);
+
+  function loop(){
+    if(!state.running)return;
+    ctx.clearRect(0,0,800,500);
+    ctx.fillStyle='#0a1020';ctx.fillRect(0,0,800,500);
+    ctx.strokeStyle='rgba(0,212,255,0.04)';ctx.lineWidth=1;
+    for(let x=0;x<800;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,500);ctx.stroke();}
+    for(let y=0;y<500;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
+    evs.forEach(ev=>{
+      const tgt=state.objects.find(o=>o.id===ev.targetId);if(!tgt)return;
+      const L=state.keys['ArrowLeft']||state.keys['KeyA'];
+      const R=state.keys['ArrowRight']||state.keys['KeyD'];
+      const J=state.keys['Space']||state.keys['ArrowUp']||state.keys['KeyW'];
+      if(ev.trigger==='key_left'&&L)tgt.velX=-(tgt.speed||3);
+      if(ev.trigger==='key_right'&&R)tgt.velX=(tgt.speed||3);
+      if(ev.trigger==='key_space'&&J){
+        if(ev.action==='jump'&&tgt.onGround){tgt.velY=-12;tgt.onGround=false;}
+        if(ev.action==='shoot'){state.objects.push({id:'b_'+Date.now(),x:tgt.x+tgt.w/2-4,y:tgt.y-12,w:8,h:16,color:'#ffdd00',velX:0,velY:-10,gravity:0,speed:0,onGround:false,opacity:1});}
+      }
+    });
+    state.objects=state.objects.filter(o=>o.y<600&&o.y>-300);
+    state.objects.forEach(obj=>{
+      if(obj.gravity)obj.velY+=obj.gravity;
+      obj.x+=(obj.velX||0);obj.y+=(obj.velY||0);obj.velX=(obj.velX||0)*0.82;
+      if(obj.gravity){
+        state.objects.forEach(pl=>{
+          if(pl.id!==obj.id&&!pl.gravity&&(pl.w||0)>50){
+            if(obj.x<pl.x+pl.w&&obj.x+obj.w>pl.x&&obj.y+obj.h>=pl.y&&obj.y+obj.h<=pl.y+pl.h+8&&(obj.velY||0)>=0){
+              obj.y=pl.y-obj.h;obj.velY=0;obj.onGround=true;
+            }
+          }
+        });
+        if(obj.y+obj.h>=500){obj.y=500-obj.h;obj.velY=0;obj.onGround=true;}
+        if(obj.x<0)obj.x=0;if(obj.x+obj.w>800)obj.x=800-obj.w;
+      }
+      ctx.globalAlpha=obj.opacity!==undefined?obj.opacity:1;
+      ctx.fillStyle=obj.color||'#00d4ff';ctx.fillRect(obj.x,obj.y,obj.w,obj.h);ctx.globalAlpha=1;
+    });
+    ctx.fillStyle='#00d4ff';ctx.font='bold 13px Orbitron,monospace';ctx.fillText('Score: '+state.score,10,22);
+    ctx.fillStyle='rgba(0,212,255,0.35)';ctx.font='10px Orbitron,monospace';ctx.fillText('Arrow/WASD = Move | Space = Jump/Shoot',10,490);
+    previewRAF=requestAnimationFrame(loop);
+  }
+  loop();
+  canvas.focus();
+  window._stopPreview=()=>{state.running=false;window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);};
+}
+
+function stopPreview(){ if(window._stopPreview){window._stopPreview();window._stopPreview=null;} if(previewRAF){cancelAnimationFrame(previewRAF);previewRAF=null;} }
+function closePreview(){ stopPreview(); closeModal('preview-modal'); }
+
+function openPublishModal(){ document.getElementById('pub-title').value=document.getElementById('proj-name').value||''; document.getElementById('publish-modal').classList.add('open'); }
+
+function publishGame(){
+  if(!currentUser){ toast('Login required','error'); return; }
+  const title=document.getElementById('pub-title').value.trim();
+  const desc=document.getElementById('pub-desc').value.trim();
+  const genre=document.getElementById('pub-genre').value;
+  if(!title){ toast('Enter game title','error'); return; }
+  saveProject();
+  const game={id:'g_'+Date.now(),title,description:desc,genre,creatorId:currentUser.id,objects:labObjects.map(o=>({...o})),events:labEvents.map(e=>({...e})),plays:0,likes:0,createdAt:new Date().toISOString(),thumbnail:''};
+  allGames.push(game);
+  if(currentProjectId){ const p=allProjects.find(pp=>pp.id===currentProjectId); if(p)p.published=true; }
+  saveData();
+  closeModal('publish-modal');
+  toast('🎉 Game published! Find it in Games.','success');
+  setTimeout(()=>showPage('games'),1500);
+}
+
+function openTemplates(){ document.getElementById('templates-modal').classList.add('open'); }
+
+// ============================================================
+// WITHDRAW
+// ============================================================
+function openWithdrawModal(){
+  if(!currentUser||(currentUser.balance||0)<5){ toast('Need at least $5 balance','error'); return; }
+  document.getElementById('wd-amount').max=Math.min(10,currentUser.balance||0);
+  document.getElementById('withdraw-modal').classList.add('open');
+}
+document.getElementById('wd-method').addEventListener('change',function(){
+  const labels={'paypal':'PayPal Email','upi':'UPI ID','bank':'Account Number / IBAN'};
+  document.getElementById('wd-detail-label').textContent=labels[this.value]||'Details';
+});
+
+function submitWithdraw(){
+  const method=document.getElementById('wd-method').value;
+  const details=document.getElementById('wd-details').value.trim();
+  const amount=parseFloat(document.getElementById('wd-amount').value)||0;
+  if(!details){ toast('Enter payment details','error'); return; }
+  if(amount<5){ toast('Minimum $5','error'); return; }
+  if(amount>10){ toast('Maximum $10 per request','error'); return; }
+  if((currentUser.balance||0)<amount){ toast('Insufficient balance','error'); return; }
+  currentUser.balance=(currentUser.balance||0)-amount;
+  const idx=allUsers.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0)allUsers[idx]=currentUser;
+  saveData();
+  closeModal('withdraw-modal');
+  toast(`Withdrawal of $${amount} via ${method} submitted! Admin reviews within 24h.`,'success');
+  renderDashboard();
+}
+
+// ============================================================
+// CONTACT
+// ============================================================
+function sendContact(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const subject=document.getElementById('c-subject').value.trim();
+  const msg=document.getElementById('c-msg').value.trim();
+  if(!name||!email||!subject||!msg){ toast('Fill all fields','error'); return; }
+  toast('Message sent! We\'ll get back to you soon.','success');
+  document.getElementById('c-name').value='';
+  document.getElementById('c-email').value='';
+  document.getElementById('c-subject').value='';
+  document.getElementById('c-msg').value='';
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){ if(e.target===this)this.classList.remove('open'); }));
+
+// ============================================================
+// HERO PARTICLES
+// ============================================================
+function createParticles(){
+  const container=document.getElementById('hero-particles');
+  for(let i=0;i<25;i++){
+    const s=document.createElement('span');
+    const size=Math.random()*4+1;
+    s.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.5+0.1};animation-duration:${Math.random()*4+3}s;animation-delay:${Math.random()*4}s;`;
+    container.appendChild(s);
+  }
+}
+
+// ============================================================
+// SEED DEMO DATA
+// ============================================================
+function seedDemoData(){
+  if(allGames.length>0) return;
+  const demoUser={id:'demo_user_1',username:'gamemaster',fullName:'Game Master',email:'demo@example.com',password:btoa('Demo123!'),bio:'Pro game creator',earnings:12.50,plays:2500,balance:2.50,createdAt:'2026-01-01T00:00:00.000Z'};
+  allUsers=[demoUser];
+  const demoGames=[
+    {id:'g_demo1',title:'Pixel Platformer',description:'Jump over obstacles and reach the flag!',genre:'Platformer',creatorId:'demo_user_1',objects:TEMPLATES.platformer.objects,events:TEMPLATES.platformer.events,plays:450,likes:24,createdAt:'2026-03-05T10:00:00.000Z',thumbnail:''},
+    {id:'g_demo2',title:'Space Shooter',description:'Defeat the alien invasion!',genre:'Shooter',creatorId:'demo_user_1',objects:TEMPLATES.shooter.objects,events:TEMPLATES.shooter.events,plays:312,likes:18,createdAt:'2026-03-08T10:00:00.000Z',thumbnail:''},
+    {id:'g_demo3',title:'Endless Runner Pro',description:'How far can you run?',genre:'Runner',creatorId:'demo_user_1',objects:TEMPLATES.runner.objects,events:TEMPLATES.runner.events,plays:689,likes:41,createdAt:'2026-03-10T10:00:00.000Z',thumbnail:''},
+  ];
+  allGames=demoGames;
+  saveData();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(function init(){
+  seedDemoData();
+  updateNavAuth();
+  applyTheme(localStorage.getItem('igd_theme')||'dark-pro', false);
+  createParticles();
+  showPage('home');
+  // Scroll-based navbar
+  window.addEventListener('scroll',()=>{ const n=document.getElementById('navbar'); n.style.boxShadow=window.scrollY>20?'0 4px 30px rgba(0,212,255,0.1)':'none'; });
+})();
+</script>
+</body>
+</html>
